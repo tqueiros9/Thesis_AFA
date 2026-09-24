@@ -1,4 +1,4 @@
-"""
+""" 
 Avaliacao das previsoes da horse race (metricas e testes da seccao 3.7).
 
 Nao re-treina nada: le os ficheiros gravados por horse_race_forecasting_fixed.py
