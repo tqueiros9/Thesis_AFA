@@ -7,14 +7,14 @@ Testa se o indice de risco geopolitico Caldara-Iacoviello acrescenta informacao
 para alem das caracteristicas da opcao, do ETF subjacente e do VIX. Compara oito
 modelos contra dois referenciais: passeio aleatorio e arvore binomial CRR.
 
-Entradas (todas locais; a execucao nao acede a internet):
-    codigo/dados_finais.xlsx              opcoes Bloomberg
-    codigo/data_gpr_daily_recent.xls      indice GPR
-    dados_mercado/ita_vix.csv             VIX
-    dados_mercado/ita_risk_free.csv       taxa sem risco (^IRX)
-    dados_mercado/ita_dividend_yield.csv  dividend yield do ITA
+Entradas (todas na pasta deste script; a execucao nao acede a internet):
+    dados_finais.xlsx              opcoes Bloomberg
+    data_gpr_daily_recent.xls      indice GPR
+    ita_vix.csv                    VIX
+    ita_risk_free.csv              taxa sem risco (^IRX)
+    ita_dividend_yield.csv         dividend yield do ITA
 
-Saidas em output_horse_race/:
+Saidas em output_horse_race/, dentro da pasta deste script:
     ITA/results_*.csv       metricas por configuracao
     ITA/predictions_*.csv   previsoes do conjunto de teste
     sample_flow.csv         contagens da amostra em cada etapa
@@ -53,24 +53,25 @@ from catboost import CatBoostRegressor
 RANDOM_SEED      = 42
 np.random.seed(RANDOM_SEED)
 
-PROJECT_DIR      = Path(r"C:\Users\tiago\Desktop\TFM")
+# Pasta onde esta o script: entradas e saidas ficam todas aqui
+PROJECT_DIR      = Path(__file__).resolve().parent
 
-OPTIONS_FILE     = PROJECT_DIR / "codigo" / "dados_finais.xlsx"
-GPR_FILE         = PROJECT_DIR / "codigo" / "data_gpr_daily_recent.xls"
+OPTIONS_FILE     = PROJECT_DIR / "dados_finais.xlsx"
+GPR_FILE         = PROJECT_DIR / "data_gpr_daily_recent.xls"
 OUTPUT_DIR       = PROJECT_DIR / "output_horse_race"
 
 # Dados de mercado guardados localmente
-DIV_YIELD_FILE   = PROJECT_DIR / "dados_mercado" / "ita_dividend_yield.csv"
-VIX_FILE         = PROJECT_DIR / "dados_mercado" / "ita_vix.csv"
-RF_FILE          = PROJECT_DIR / "dados_mercado" / "ita_risk_free.csv"
+DIV_YIELD_FILE   = PROJECT_DIR / "ita_dividend_yield.csv"
+VIX_FILE         = PROJECT_DIR / "ita_vix.csv"
+RF_FILE          = PROJECT_DIR / "ita_risk_free.csv"
 
 RISK_FREE_TICKER = "^IRX"
 VIX_TICKER       = "^VIX"
 
-# Execucao sem acesso a internet: exige os CSV em dados_mercado/.
+# Execucao sem acesso a internet: exige os CSV na pasta do script.
 # Passar a False apenas para regenerar series em falta.
 OFFLINE_ONLY     = True
-PROVENANCE_FILE  = PROJECT_DIR / "dados_mercado" / "PROVENIENCIA.txt"
+PROVENANCE_FILE  = PROJECT_DIR / "PROVENIENCIA.txt"
 
 TRAIN_RATIO      = 0.80
 
@@ -357,11 +358,11 @@ def verificar_dados_mercado(start_date, end_date):
     linhas = [f"Nao e possivel correr: {len(em_falta) + len(incompletos)} "
               f"de {len(series)} series de mercado com problemas.", ""]
     if em_falta:
-        linhas += ["  Em falta em dados_mercado/:"] + em_falta + [""]
+        linhas += ["  Em falta na pasta do script:"] + em_falta + [""]
     if incompletos:
         linhas += ["  Nao cobrem o periodo das opcoes:"] + incompletos + [""]
     linhas += [
-        "  Coloque os ficheiros em dados_mercado/. As series com ticker podem",
+        "  Coloque os ficheiros na pasta do script. As series com ticker podem",
         "  ser descarregadas definindo OFFLINE_ONLY=False; o dividend yield e",
         "  pre-calculado (dividendos de 12 meses / preco de fecho) e tem de ser",
         "  gerado a parte.",
@@ -390,7 +391,7 @@ def _serie_mercado(path, col, ticker, start_date, end_date):
     if OFFLINE_ONLY:
         raise FileNotFoundError(
             f"{path} nao existe e OFFLINE_ONLY=True.\n"
-            f"    Coloque o ficheiro em dados_mercado/, ou defina OFFLINE_ONLY=False "
+            f"    Coloque o ficheiro na pasta do script, ou defina OFFLINE_ONLY=False "
             f"para o descarregar de {ticker}."
         )
 
@@ -1614,6 +1615,7 @@ def main():
         f.write(f"numpy: {np.__version__}\npandas: {pd.__version__}\n")
         f.write(f"scikit-learn: {_sk.__version__}\nxgboost: {xgb.__version__}\n")
         f.write(f"lightgbm: {lgb.__version__}\n")
+        f.write(f"catboost: {__import__('catboost').__version__}\n")
         f.write(f"yfinance: {yf.__version__}\n")
         f.write(f"seed: {RANDOM_SEED}\nhorizonte: {MAIN_HORIZON_DAYS}\n")
         f.write(f"n_iter_base: {N_ITER_SEARCH}\nn_iter_escalado: {SCALE_N_ITER}\n")

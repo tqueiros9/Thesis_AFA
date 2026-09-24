@@ -1,0 +1,40 @@
+# Proveniencia dos dados usados na horse race
+# Todos os ficheiros estao na pasta do script; a execucao le apenas estes ficheiros
+# e nunca descarrega dados.
+
+dados_finais.xlsx
+  fonte        : Bloomberg Terminal (Spreadsheet Builder), opcoes call americanas sobre ITA US
+  campos       : PX_LAST, PX_BID, PX_ASK, MATURITY, IVOL_MID, PX_VOLUME, OPEN_INT,
+                 EOD_TIME_TO_EXPIRY_LAST; fecho do ITA US e do SPX
+  transformacao: nenhuma (mid-quote e variaveis derivadas calculadas no script)
+  periodo      : 2025-11-20 a 2026-06-25  (30 contratos, 1980 observacoes contrato-dia)
+  extraido     : 2026-06-30
+
+data_gpr_daily_recent.xls
+  fonte        : Caldara & Iacoviello, Daily Geopolitical Risk Index
+  obtido via   : matteoiacoviello.com/gpr.htm
+  atualizacao  : semanal, as segundas-feiras; valores recentes preliminares e sujeitos a revisao
+  transformacao: nenhuma (as 14 variaveis sao calculadas no script, com atraso de 7 dias)
+  periodo      : 1985-01-01 a 2026-06-29
+  descarregado : 2026-06-30
+
+ita_vix.csv
+  fonte        : ^VIX (CBOE Volatility Index)
+  obtido via   : yfinance
+  transformacao: fecho diario / 100
+  periodo      : 2025-11-20 a 2026-06-29  (151 linhas)
+  descarregado : 2026-08-27
+
+ita_risk_free.csv
+  fonte        : ^IRX (US T-Bill 13 semanas)
+  obtido via   : yfinance
+  transformacao: fecho diario / 100
+  periodo      : 2025-11-20 a 2026-06-29  (150 linhas)
+  descarregado : 2026-08-27
+
+ita_dividend_yield.csv
+  fonte        : ITA (iShares US Aerospace & Defense)
+  obtido via   : yfinance
+  transformacao: soma dos dividendos de 12 meses / preco de fecho
+  periodo      : 2018-01-02 a 2026-08-25  (2173 linhas)
+  descarregado : 2026-08-27
