@@ -1,0 +1,388 @@
+teste: 506 obs 29 datas 2026-05-07 00:00:00 -> 2026-06-17 00:00:00
+contratos no teste: 18 | contratos/data media: 17.4
+liquido (regra tripla) no teste: 180 obs 29 datas | vol>0 apenas: 193
+
+==== METRICAS [amostra completa de teste] ====
+-- RMSE
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             3.0882  3.0882  3.0882     3.0882
+CRR            3.3187  3.3187  3.3187     3.3187
+OLS            3.9572  3.4644  4.2647     3.4512
+Ridge          3.7246  3.2942  3.8961     3.3054
+EN-delta       3.4353  3.1285  3.5110     3.2192
+XGBoost        3.5240  3.2342  3.5731     3.4462
+RF             3.4715  3.3907  3.4640     3.4069
+LightGBM       3.6169  3.3166  3.5900     3.3759
+CatBoost       3.5819  3.4186  3.9457     3.5028
+MLP            4.0372  5.6921  4.6444     5.8338
+-- MAE
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             2.4540  2.4540  2.4540     2.4540
+CRR            2.5348  2.5348  2.5348     2.5348
+OLS            3.2349  2.8411  3.4814     2.8793
+Ridge          2.9358  2.6612  3.0681     2.6574
+EN-delta       2.7146  2.5212  2.7807     2.5840
+XGBoost        2.7378  2.5011  2.8004     2.7114
+RF             2.6281  2.5290  2.6202     2.5600
+LightGBM       2.8265  2.5119  2.8041     2.6524
+CatBoost       2.8509  2.7439  3.0971     2.7365
+MLP            3.1593  4.7417  3.7217     4.8521
+-- R2_OOS
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             0.0000  0.0000  0.0000     0.0000
+CRR           -0.1548 -0.1548 -0.1548    -0.1548
+OLS           -0.6420 -0.2585 -0.9071    -0.2489
+Ridge         -0.4546 -0.1378 -0.5916    -0.1456
+EN-delta      -0.2375 -0.0263 -0.2925    -0.0867
+XGBoost       -0.3022 -0.0968 -0.3387    -0.2453
+RF            -0.2636 -0.2055 -0.2582    -0.2170
+LightGBM      -0.3717 -0.1534 -0.3514    -0.1950
+CatBoost      -0.3453 -0.2254 -0.6325    -0.2866
+MLP           -0.7090 -2.3973 -1.2618    -2.5685
+-- U
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             1.0000  1.0000  1.0000     1.0000
+CRR            1.0746  1.0746  1.0746     1.0746
+OLS            1.2814  1.1218  1.3810     1.1175
+Ridge          1.2061  1.0667  1.2616     1.0703
+EN-delta       1.1124  1.0130  1.1369     1.0424
+XGBoost        1.1411  1.0473  1.1570     1.1159
+RF             1.1241  1.0979  1.1217     1.1032
+LightGBM       1.1712  1.0739  1.1625     1.0932
+CatBoost       1.1599  1.1070  1.2777     1.1343
+MLP            1.3073  1.8432  1.5039     1.8890
+
+==== METRICAS [subamostra liquida regra tripla] ====
+-- RMSE
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             2.9057  2.9057  2.9057     2.9057
+CRR            3.0451  3.0451  3.0451     3.0451
+OLS            3.7302  3.4387  4.0165     3.3972
+Ridge          3.3787  3.1530  3.5457     3.0778
+EN-delta       3.1921  2.9758  3.2704     3.0121
+XGBoost        3.2513  3.0730  3.3220     3.2156
+RF             3.2520  3.2320  3.2440     3.2366
+LightGBM       3.3606  3.1967  3.3333     3.1831
+CatBoost       3.4383  3.2174  3.6269     3.2315
+MLP            3.9040  5.1893  4.5316     5.2269
+-- MAE
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             2.3524  2.3524  2.3524     2.3524
+CRR            2.3512  2.3512  2.3512     2.3512
+OLS            3.0987  2.8692  3.3236     2.8948
+Ridge          2.6812  2.5801  2.8127     2.4784
+EN-delta       2.5323  2.4147  2.6003     2.4380
+XGBoost        2.5244  2.3847  2.6216     2.5436
+RF             2.4603  2.4330  2.4519     2.4185
+LightGBM       2.6216  2.4227  2.6066     2.5016
+CatBoost       2.8116  2.6132  2.8538     2.5692
+MLP            3.0282  4.2729  3.6122     4.2645
+-- R2_OOS
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             0.0000  0.0000  0.0000     0.0000
+CRR           -0.0983 -0.0983 -0.0983    -0.0983
+OLS           -0.6481 -0.4005 -0.9108    -0.3670
+Ridge         -0.3521 -0.1775 -0.4891    -0.1220
+EN-delta      -0.2069 -0.0488 -0.2668    -0.0746
+XGBoost       -0.2521 -0.1185 -0.3071    -0.2247
+RF            -0.2526 -0.2372 -0.2465    -0.2407
+LightGBM      -0.3377 -0.2103 -0.3160    -0.2001
+CatBoost      -0.4003 -0.2261 -0.5581    -0.2368
+MLP           -0.8052 -2.1895 -1.4323    -2.2359
+-- U
+cfg       sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                           
+RW             1.0000  1.0000  1.0000     1.0000
+CRR            1.0480  1.0480  1.0480     1.0480
+OLS            1.2838  1.1834  1.3823     1.1692
+Ridge          1.1628  1.0851  1.2203     1.0592
+EN-delta       1.0986  1.0241  1.1255     1.0366
+XGBoost        1.1190  1.0576  1.1433     1.1067
+RF             1.1192  1.1123  1.1165     1.1139
+LightGBM       1.1566  1.1002  1.1472     1.0955
+CatBoost       1.1833  1.1073  1.2482     1.1121
+MLP            1.3436  1.7859  1.5596     1.7989
+
+==== TESTE CENTRAL | A=GPR_e_VIX vs B=so_VIX | perda=sq ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  3.4512  4.2647   -19.0762 2.8793 3.4814  -17.2935 -0.8707 0.3913       29           16 -6.1709 7.0873          1.0       1.0000
+   Ridge  3.3054  3.8961   -15.1603 2.6574 3.0681  -13.3854 -0.9791 0.3359       29           19 -4.2043 4.2940          1.0       1.0000
+EN-delta  3.2192  3.5110    -8.3095 2.5840 2.7807   -7.0730 -0.7725 0.4463       29           17 -1.9249 2.4918          1.0       1.0000
+ XGBoost  3.4462  3.5731    -3.5529 2.7114 2.8004   -3.1759 -0.4195 0.6780       29           20 -0.8959 2.1355          1.0       1.0000
+      RF  3.4069  3.4640    -1.6490 2.5600 2.6202   -2.2992 -0.1470 0.8842       29           16 -0.2890 1.9665          NaN       1.0000
+LightGBM  3.3759  3.5900    -5.9634 2.6524 2.8041   -5.4078 -0.5624 0.5783       29           19 -1.4447 2.5691          NaN       1.0000
+CatBoost  3.5028  3.9457   -11.2244 2.7365 3.0971  -11.6453 -1.1218 0.2715       29           21 -3.4187 3.0474          NaN       1.0000
+     MLP  5.8338  4.6444    25.6086 4.8521 3.7217   30.3716  2.4281 0.0219       29            9 12.2386 5.0403          NaN       0.1748
+
+==== TESTE CENTRAL (MAE) | A=GPR_e_VIX vs B=so_VIX | perda=abs ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  3.4512  4.2647   -19.0762 2.8793 3.4814  -17.2935 -0.7829 0.4403       29           16 -0.6096 0.7788          1.0       1.0000
+   Ridge  3.3054  3.8961   -15.1603 2.6574 3.0681  -13.3854 -0.8876 0.3823       29           18 -0.4172 0.4701          1.0       1.0000
+EN-delta  3.2192  3.5110    -8.3095 2.5840 2.7807   -7.0730 -0.6849 0.4990       29           17 -0.1970 0.2877          1.0       1.0000
+ XGBoost  3.4462  3.5731    -3.5529 2.7114 2.8004   -3.1759 -0.3662 0.7170       29           20 -0.0934 0.2551          1.0       1.0000
+      RF  3.4069  3.4640    -1.6490 2.5600 2.6202   -2.2992 -0.1494 0.8823       29           16 -0.0405 0.2709          NaN       1.0000
+LightGBM  3.3759  3.5900    -5.9634 2.6524 2.8041   -5.4078 -0.4756 0.6380       29           18 -0.1482 0.3117          NaN       1.0000
+CatBoost  3.5028  3.9457   -11.2244 2.7365 3.0971  -11.6453 -0.9959 0.3278       29           19 -0.3856 0.3871          NaN       1.0000
+     MLP  5.8338  4.6444    25.6086 4.8521 3.7217   30.3716  2.8958 0.0073       29            9  1.1009 0.3802          NaN       0.0581
+
+==== GPR vs baseline | A=so_GPR vs B=sem_indices | perda=sq ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  3.4644  3.9572   -12.4528 2.8411 3.2349  -12.1738 -0.5526 0.5849       29           17 -3.5554 6.4340          1.0       1.0000
+   Ridge  3.2942  3.7246   -11.5557 2.6612 2.9358   -9.3555 -0.6434 0.5252       29           17 -3.0042 4.6689          1.0       1.0000
+EN-delta  3.1285  3.4353    -8.9326 2.5212 2.7146   -7.1256 -0.6592 0.5151       29           19 -1.9870 3.0141          1.0       1.0000
+ XGBoost  3.2342  3.5240    -8.2233 2.5011 2.7378   -8.6457 -0.6642 0.5120       29           18 -1.9539 2.9415          1.0       1.0000
+      RF  3.3907  3.4715    -2.3282 2.5290 2.6281   -3.7714 -0.2459 0.8075       29           16 -0.5070 2.0618          NaN       1.0000
+LightGBM  3.3166  3.6169    -8.3039 2.5119 2.8265  -11.1328 -0.7162 0.4798       29           20 -2.1296 2.9736          NaN       1.0000
+CatBoost  3.4186  3.5819    -4.5567 2.7439 2.8509   -3.7563 -0.6429 0.5255       29           16 -1.1504 1.7894          NaN       1.0000
+     MLP  5.6921  4.0372    40.9912 4.7417 3.1593   50.0853  2.8957 0.0073       29            4 15.9110 5.4946          NaN       0.0581
+
+==== VIX marginal dado GPR | A=GPR_e_VIX vs B=so_GPR | perda=sq ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  3.4512  3.4644    -0.3835 2.8793 2.8411    1.3449 -0.0492 0.9611       29           14 -0.0722 1.4662          1.0          1.0
+   Ridge  3.3054  3.2942     0.3417 2.6574 2.6612   -0.1409  0.0904 0.9286       29           12  0.1369 1.5152          1.0          1.0
+EN-delta  3.2192  3.1285     2.9009 2.5840 2.5212    2.4925  0.4910 0.6272       29           11  0.5968 1.2154          1.0          1.0
+ XGBoost  3.4462  3.2342     6.5535 2.7114 2.5011    8.4093  1.0222 0.3155       29           11  1.4471 1.4157          1.0          1.0
+      RF  3.4069  3.3907     0.4782 2.5600 2.5290    1.2262  0.6047 0.5503       29           13  0.1603 0.2651          NaN          1.0
+LightGBM  3.3759  3.3166     1.7884 2.6524 2.5119    5.5964  0.2980 0.7679       29           12  0.5380 1.8053          NaN          1.0
+CatBoost  3.5028  3.4186     2.4630 2.7365 2.7439   -0.2691  0.5635 0.5776       29           15  0.5584 0.9909          NaN          1.0
+     MLP  5.8338  5.6921     2.4888 4.8521 4.7417    2.3286  1.1001 0.2807       29           12  1.6503 1.5001          NaN          1.0
+
+==== VIX vs baseline | A=so_VIX vs B=sem_indices | perda=sq ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  4.2647  3.9572     7.7699 3.4814 3.2349    7.6183  1.2727 0.2136       29           10  2.5433 1.9983        0.766       1.0000
+   Ridge  3.8961  3.7246     4.6050 3.0681 2.9358    4.5053  1.3385 0.1915       29           10  1.3371 0.9989        0.766       1.0000
+EN-delta  3.5110  3.4353     2.2017 2.7807 2.7146    2.4344  1.0765 0.2909       29           11  0.5347 0.4968        0.766       1.0000
+ XGBoost  3.5731  3.5240     1.3938 2.8004 2.7378    2.2850  0.7371 0.4672       29           12  0.3891 0.5279        0.766       1.0000
+      RF  3.4640  3.4715    -0.2158 2.6202 2.6281   -0.2992 -0.8062 0.4269       29           14 -0.0577 0.0716          NaN       1.0000
+LightGBM  3.5900  3.6169    -0.7451 2.8041 2.8265   -0.7946 -0.3134 0.7563       29           14 -0.1468 0.4686          NaN       1.0000
+CatBoost  3.9457  3.5819    10.1588 3.0971 2.8509    8.6356  1.0227 0.3152       29            8  2.8267 2.7638          NaN       1.0000
+     MLP  4.6444  4.0372    15.0401 3.7217 3.1593   17.8018  2.4280 0.0219       29            6  5.3227 2.1922          NaN       0.1749
+
+==== TESTE CENTRAL liquido | A=GPR_e_VIX vs B=so_VIX | perda=sq ====
+   model  RMSE_A  RMSE_B  dRMSE_pct  MAE_A  MAE_B  dMAE_pct      DM      p  n_dates  dates_fav_A  mean_d   se_d  p_holm_main  p_holm_all8
+     OLS  3.3972  4.0165   -15.4182 2.8948 3.3236  -12.9039 -0.8598 0.3972       29           17 -5.8465 6.7998          1.0       1.0000
+   Ridge  3.0778  3.5457   -13.1972 2.4784 2.8127  -11.8865 -1.0072 0.3225       29           20 -4.2493 4.2188          1.0       1.0000
+EN-delta  3.0121  3.2704    -7.8998 2.4380 2.6003   -6.2424 -0.8645 0.3947       29           19 -2.2786 2.6359          1.0       1.0000
+ XGBoost  3.2156  3.3220    -3.2023 2.5436 2.6216   -2.9775 -0.4632 0.6468       29           20 -1.0290 2.2217          1.0       1.0000
+      RF  3.2366  3.2440    -0.2306 2.4185 2.4519   -1.3593 -0.3164 0.7540       29           17 -0.5429 1.7156          NaN       1.0000
+LightGBM  3.1831  3.3333    -4.5081 2.5016 2.6066   -4.0310 -0.3321 0.7423       29           15 -0.9370 2.8214          NaN       1.0000
+CatBoost  3.2315  3.6269   -10.9030 2.5692 2.8538   -9.9735 -1.0574 0.2994       29           19 -3.2860 3.1077          NaN       1.0000
+     MLP  5.2269  4.5316    15.3430 4.2645 3.6122   18.0584  1.6241 0.1156       29           13  7.3996 4.5562          NaN       0.9245
+
+==== DM vs RW [so_VIX] ====
+   model     DM      p  dates_fav_model  p_holm9  p_holm_main5
+     CRR 1.1727 0.2508               13      1.0           1.0
+     OLS 1.0371 0.3086                9      1.0           1.0
+   Ridge 0.8015 0.4296               11      1.0           1.0
+EN-delta 0.5405 0.5931               15      1.0           1.0
+ XGBoost 0.6613 0.5138               12      1.0           1.0
+      RF 0.4751 0.6384               16      1.0           NaN
+LightGBM 0.6549 0.5179               12      1.0           NaN
+CatBoost 0.9366 0.3570               12      1.0           NaN
+     MLP 1.5766 0.1261                6      1.0           NaN
+
+==== DM vs RW [GPR_e_VIX] ====
+   model     DM      p  dates_fav_model  p_holm9  p_holm_main5
+     CRR 1.1727 0.2508               13   1.0000           1.0
+     OLS 0.6857 0.4985                9   1.0000           1.0
+   Ridge 0.4205 0.6773               12   1.0000           1.0
+EN-delta 0.2971 0.7686               13   1.0000           1.0
+ XGBoost 0.7721 0.4465               12   1.0000           1.0
+      RF 0.4830 0.6329               14   1.0000           NaN
+LightGBM 0.6462 0.5234               10   1.0000           NaN
+CatBoost 0.6502 0.5209               11   1.0000           NaN
+     MLP 2.4761 0.0196                3   0.1763           NaN
+
+==== EFEITO MINIMO DETECTAVEL (teste central, perda quadratica) ====
+OLS       MSE_B= 18.188 mean_d= -6.171 se= 7.087 MDE(MSE)=20.575 (113.1% do MSE) -> reducao RMSE min ~100.0% | observada  19.1%
+Ridge     MSE_B= 15.180 mean_d= -4.204 se= 4.294 MDE(MSE)=12.466 ( 82.1% do MSE) -> reducao RMSE min ~ 57.7% | observada  15.2%
+EN-delta  MSE_B= 12.327 mean_d= -1.925 se= 2.492 MDE(MSE)= 7.234 ( 58.7% do MSE) -> reducao RMSE min ~ 35.7% | observada   8.3%
+XGBoost   MSE_B= 12.767 mean_d= -0.896 se= 2.135 MDE(MSE)= 6.199 ( 48.6% do MSE) -> reducao RMSE min ~ 28.3% | observada   3.6%
+RF        MSE_B= 11.999 mean_d= -0.289 se= 1.966 MDE(MSE)= 5.709 ( 47.6% do MSE) -> reducao RMSE min ~ 27.6% | observada   1.6%
+LightGBM  MSE_B= 12.888 mean_d= -1.445 se= 2.569 MDE(MSE)= 7.458 ( 57.9% do MSE) -> reducao RMSE min ~ 35.1% | observada   6.0%
+CatBoost  MSE_B= 15.569 mean_d= -3.419 se= 3.047 MDE(MSE)= 8.847 ( 56.8% do MSE) -> reducao RMSE min ~ 34.3% | observada  11.2%
+MLP       MSE_B= 21.570 mean_d= 12.239 se= 5.040 MDE(MSE)=14.632 ( 67.8% do MSE) -> reducao RMSE min ~ 43.3% | observada -25.6%
+
+==== DIFERENCIAL POR DATA (GPR_e_VIX - so_VIX), perda quadratica media ====
+            var_realizada    OLS  Ridge  EN-delta  XGBoost
+2026-05-07           0.16   7.50   1.13      0.85    -0.17
+2026-05-08          -2.54  17.04   7.27      3.72    -1.85
+2026-05-11          -2.42  14.74   8.98      5.43     6.03
+2026-05-12          -2.46   5.36   3.49      1.80     4.06
+2026-05-13          -1.40   1.61   0.44      0.01    -0.14
+2026-05-14          -1.15   1.31  -0.19     -0.81    -0.02
+2026-05-15           2.35  -7.88  -1.90      0.85     2.16
+2026-05-18           3.60  -5.32  -2.71     -0.18    -0.22
+2026-05-19           4.54  -4.31  -2.09      1.57     6.59
+2026-05-20           5.26   1.34  -0.44      1.83     3.38
+2026-05-21           5.13  -2.68  -2.45      0.93     4.93
+2026-05-22           2.13   1.02  -0.10     -0.04     1.48
+2026-05-26          -0.41   4.84   0.64      0.31    -0.36
+2026-05-27          -2.24   3.71   1.23      0.12    -1.68
+2026-05-28          -1.94   0.08   0.06     -0.49    -0.81
+2026-05-29          -2.35  -2.26  -0.11     -0.22    -0.93
+2026-06-01          -1.22  -6.25  -4.71     -1.27    -1.90
+2026-06-02           0.33 -19.02  -6.96     -2.48    -0.61
+2026-06-03           0.35 -21.23  -8.72     -3.94    -2.24
+2026-06-04           2.01 -21.55  -9.01     -4.77    -4.20
+2026-06-05           1.99 -14.30 -13.35     -8.75    -3.98
+2026-06-08           4.43 -34.30 -22.99    -12.91   -20.69
+2026-06-09           4.40 -31.76 -20.80    -13.26    -5.80
+2026-06-10           7.58 -55.29 -39.75    -21.46    -7.60
+2026-06-11           1.72 -10.11  -2.99     -0.78    -2.91
+2026-06-12           0.27  -3.68  -5.75     -1.43    -3.07
+2026-06-15          -1.44  -3.73  -2.43     -0.57    -1.56
+2026-06-16          -1.92   0.75   1.45      0.90     4.34
+2026-06-17          -2.02   5.42   0.84     -0.76     1.79
+OLS: soma=-178.96 | 3 datas mais favoraveis=-121.35 (68% do total) | datas favoraveis=16/29 | 1a metade=38.28 2a metade=-217.23
+Ridge: soma=-121.93 | 3 datas mais favoraveis=-83.54 (69% do total) | datas favoraveis=19/29 | 1a metade=13.29 2a metade=-135.22
+EN-delta: soma=-55.82 | 3 datas mais favoraveis=-47.64 (85% do total) | datas favoraveis=17/29 | 1a metade=16.38 2a metade=-72.20
+XGBoost: soma=-25.98 | 3 datas mais favoraveis=-34.09 (131% do total) | datas favoraveis=20/29 | 1a metade=24.21 2a metade=-50.19
+
+==== MONEYNESS (RMSE) ====
+ATM n=236 RW=3.228 | so_VIX-OLS=4.681 | so_VIX-Ridge=4.345 | so_VIX-EN-delta=3.814 | so_VIX-XGBoost=3.972 | GPR_e_-OLS=3.762 | GPR_e_-Ridge=3.658 | GPR_e_-EN-delta=3.468 | GPR_e_-XGBoost=3.672
+OTM n=267 RW=2.970 | so_VIX-OLS=3.857 | so_VIX-Ridge=3.447 | so_VIX-EN-delta=3.230 | so_VIX-XGBoost=3.169 | GPR_e_-OLS=3.115 | GPR_e_-Ridge=2.935 | GPR_e_-EN-delta=2.987 | GPR_e_-XGBoost=3.208
+ITM n=3 RW=2.022 | so_VIX-OLS=4.492 | so_VIX-Ridge=4.190 | so_VIX-EN-delta=2.452 | so_VIX-XGBoost=4.293 | GPR_e_-OLS=5.679 | GPR_e_-Ridge=4.847 | GPR_e_-EN-delta=2.753 | GPR_e_-XGBoost=5.157
+
+==== TREINO (apos purga) vs TESTE ====
+                          treino   teste
+observacoes             1082.000 506.000
+datas                    108.000  29.000
+contratos                 20.000  18.000
+contratos por data        10.019  17.448
+mid-quote medio           14.345  11.962
+variacao media a 5 dias   -0.836   0.829
+variacao absoluta media    2.792   2.454
+dias ate a maturidade    224.173 176.279
+volatilidade implicita     0.242   0.245
+VIX (media por data)       0.193   0.176
+VIX min                    0.135   0.153
+VIX max                    0.310   0.222
+GPR (media por data)     211.305 225.383
+GPR min                   59.259 126.918
+GPR max                  500.807 321.956
+quota sem volume           0.494   0.619
+liquidas (regra tripla)  501.000 180.000
+quota liquidas             0.463   0.356
+subjacente no teste: 222.51 -> 242.79 (+9.1%)
+corr(GPR_pit, VIX) amostra comum: 0.501
+
+==== IMPORTANCIA: quota do bloco GPR (GPR_e_VIX) ====
+OLS          quota GPR= 18.5% (14 de 37 var = 38%) | top=intrinsic_fwd_approx | melhor GPR=gpr_ac_pit (rank 7) | VIX rank 24
+Ridge        quota GPR= 26.9% (14 de 37 var = 38%) | top=spot_ma5 | melhor GPR=gpr_ma7_pit (rank 4) | VIX rank 8
+RandomForest quota GPR=  7.0% (14 de 37 var = 38%) | top=price | melhor GPR=gpr_pit (rank 4) | VIX rank 7
+XGBoost      quota GPR= 16.7% (14 de 37 var = 38%) | top=price | melhor GPR=gpr_pit (rank 5) | VIX rank 18
+LightGBM     quota GPR= 26.5% (14 de 37 var = 38%) | top=price | melhor GPR=gpr_ma30_pit (rank 10) | VIX rank 3
+CatBoost     quota GPR= 21.8% (14 de 37 var = 38%) | top=price | melhor GPR=gpr_ma7_pit (rank 4) | VIX rank 12
+                       OLS  Ridge  RandomForest  XGBoost  LightGBM  CatBoost
+feature                                                                     
+price                   17      3             1        1         1         1
+price_lag1              12      7             8        4         2         2
+price_return_1d         37     32            28       20        12        27
+iv                      20     12            26       36         6        29
+iv_lag1                 18     13            31       33         9        33
+iv_change               34     31            33       37        14        30
+spread                  31     23            23       30        14        22
+spread_lag1             30     34            29       35        11        36
+volume_log              32     27            30       32        35        32
+volume_log_lag1         33     35            34       34        27        37
+open_int_log            35     36            25       27         5        31
+T                       23      9            10        8         8         7
+days_to_maturity        22     10            11        6        32         8
+risk_free_rate          19     11            17       25        21        21
+gpr_pit                  9     15             4        5        29        10
+gpr_ac_pit               7     21            14       14        28        16
+gpr_th_pit              11     26             9       13        24        15
+gpr_ma7_pit              8      4             5        7        16         4
+gpr_ma30_pit            14     25             6       12        10         9
+gpr_n10d_pit            28     24            21       19        20        19
+gpr_change_pit          13     28            27       24        32        23
+gpr_pct_change_pit      21     14            20       21        21        14
+gpr_ac_change_pit       25     33            35       29        30        28
+gpr_ac_pct_change_pit   26     18            32       28        23        34
+gpr_th_change_pit       15     29            19       23        34        35
+gpr_th_pct_change_pit   29     30            12       26        26        24
+gpr_ma_diff7_pit        36     17            24       22        18        20
+gpr_ma_diff30_pit       16     16            13       17        31        17
+vix                     24      8             7       18         3        12
+moneyness                3      6            15       10         7         6
+log_moneyness            2      5            16       15        17        11
+spot_return_1d          27     22            22       16        24        13
+spot_ma5                 6      1             3       11         3         3
+intrinsic_call           4     20            36        2        37        18
+spot                    10     37            18       31        18        26
+time_value_t             5      2             2        3        13         5
+intrinsic_fwd_approx     1     19            37        9        36        25
+
+==== VIES MEDIO (previsao - realizado, USD) E QUOTA DO MSE DEVIDA AO VIES ====
+          sem_indices       so_GPR       so_VIX    GPR_e_VIX
+RW         -0.83 (7%)   -0.83 (7%)   -0.83 (7%)   -0.83 (7%)
+CRR       -1.38 (17%)  -1.38 (17%)  -1.38 (17%)  -1.38 (17%)
+OLS       -1.45 (13%)   +0.03 (0%)  -2.02 (22%)   -0.64 (3%)
+Ridge     -1.74 (22%)   -0.53 (3%)  -2.08 (29%)  -1.29 (15%)
+EN-delta  -1.51 (19%)   -0.72 (5%)  -1.68 (23%)  -1.34 (17%)
+XGBoost   -1.62 (21%)  -1.12 (12%)  -1.88 (28%)  -1.79 (27%)
+RF        -1.42 (17%)  -1.06 (10%)  -1.41 (17%)  -1.30 (15%)
+LightGBM  -1.60 (20%)  -1.12 (11%)  -1.86 (27%)  -1.55 (21%)
+CatBoost  -1.21 (11%)  -1.56 (21%)  -2.20 (31%)  -1.40 (16%)
+MLP       -2.00 (24%)  -4.43 (60%)  -3.01 (42%)  -4.60 (62%)
+
+==== TESTE CENTRAL SEM AS DATAS DE 2026-06-01 A 2026-06-10 (21 datas) ====
+OLS       RMSE com GPR=3.050 sem GPR=2.819 dRMSE=+8.2%
+Ridge     RMSE com GPR=2.659 sem GPR=2.596 dRMSE=+2.4%
+EN-delta  RMSE com GPR=2.542 sem GPR=2.405 dRMSE=+5.7%
+XGBoost   RMSE com GPR=2.826 sem GPR=2.625 dRMSE=+7.6%
+
+==== GPR CONTEMPORANEO (LAG 0, EX POST) vs DESFASADO (LAG 7) ====
+configuracoes sem GPR identicas nas duas execucoes: sim (diferenca maxima < 1e-10)
+   model  RMSE_BVIX  RMSE_lag7  RMSE_lag0  dRMSE_lag0_pct     p  U_lag0  DM_lag0_vs_lag7  p_lag0_vs_lag7  datas_fav_GPR  top3_pct  dRMSE_fora_episodio_pct  p_holm_main
+     OLS      4.265      3.451      3.122         -26.805 0.184   1.011           -0.936           0.357             23    55.182                  -12.103        0.738
+   Ridge      3.896      3.305      3.068         -21.250 0.240   0.994           -1.089           0.285             24    60.980                   -6.817        0.738
+EN-delta      3.511      3.219      3.086         -12.092 0.340   0.999           -0.838           0.409             18    73.079                   -0.362        0.738
+ XGBoost      3.573      3.446      3.364          -5.857 0.501   1.089           -0.835           0.411             18    82.038                    5.047        0.738
+-- U de Theil e DM contra o random walk com lag 0
+so_GPR     OLS       U=0.995 DM=-0.02 p=0.981
+so_GPR     Ridge     U=0.959 DM=-0.33 p=0.741
+so_GPR     EN-delta  U=0.941 DM=-0.56 p=0.582
+so_GPR     XGBoost   U=1.068 DM=+0.52 p=0.606
+GPR_e_VIX  OLS       U=1.011 DM=+0.10 p=0.921
+GPR_e_VIX  Ridge     U=0.994 DM=-0.00 p=0.997
+GPR_e_VIX  EN-delta  U=0.999 DM=+0.03 p=0.980
+GPR_e_VIX  XGBoost   U=1.089 DM=+0.61 p=0.547
+
+==== ORCAMENTO DE BUSCA: 20 x n_hiperparametros vs 20 candidatos ====
+                          sem_indices  so_GPR  so_VIX  GPR_e_VIX
+model                                                           
+CRR binomial (roll-down)         0.00    0.00    0.00       0.00
+CatBoost                         5.96    5.06  -10.29      -0.24
+ElasticNet (delta)               0.00   -0.21    0.00       0.00
+LightGBM                         0.00    0.00    0.53      -4.02
+MLP                              0.00  -24.88    0.00       0.28
+Naive (Random Walk)              0.00    0.00    0.00       0.00
+OLS                              0.00    0.00    0.00       0.00
+RandomForest                    -1.46    0.15   -1.24       0.34
+Ridge                            0.00    0.00    0.00       0.00
+XGBoost                         -1.69    4.39    0.73      -1.86
+Ridge e OLS sem alteracao por construcao (variacao maxima 0.00%)
+seis estimadores cuja busca muda (24 pares): variacao absoluta mediana 0.43% | media 2.64% | maxima 24.9%
+teste central com o orcamento escalado (dRMSE %):
+model
+CatBoost              -1.3
+ElasticNet (delta)    -8.3
+LightGBM             -10.2
+MLP                   26.0
+OLS                  -19.1
+RandomForest          -0.1
+Ridge                -15.2
+XGBoost               -6.0
+melhor estimador em sem_indices: RandomForest (U = 1.108)
+melhor estimador em so_GPR: ElasticNet (delta) (U = 1.011)
+melhor estimador em so_VIX: RandomForest (U = 1.108)
+melhor estimador em GPR_e_VIX: ElasticNet (delta) (U = 1.042)

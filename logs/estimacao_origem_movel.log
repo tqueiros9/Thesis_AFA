@@ -1,0 +1,60 @@
+========================================================================
+HORSE RACE -- ITA US (iShares Aerospace & Defense ETF)
+Horizonte: 5 dias de negociacao (calendario exato)
+GPR: 7 dias de atraso de disponibilidade
+Configs: sem_indices | so_GPR | so_VIX | GPR_e_VIX
+HP tuning: RandomizedSearch
+========================================================================
+
+[1/6] A carregar dados de opcoes...
+    ITA US: 30 contratos | 1980 obs | 2025-11-20 -> 2026-06-25
+    Com mid-quote valido (bid e ask): 1880 obs
+    Calendario de trading: 148 datas
+
+[2/6] A carregar GPR (Caldara & Iacoviello) com lag 7 dias...
+    GPR: 15155 obs | componentes: ['gpr', 'gpr_ac', 'gpr_th', 'gpr_ma7', 'gpr_ma30', 'gpr_n10d', 'gpr_change', 'gpr_pct_change', 'gpr_ac_change', 'gpr_ac_pct_change', 'gpr_th_change', 'gpr_th_pct_change', 'gpr_ma_diff7', 'gpr_ma_diff30']
+    GPR features (point-in-time, lag=7d): ['gpr_pit', 'gpr_ac_pit', 'gpr_th_pit', 'gpr_ma7_pit', 'gpr_ma30_pit', 'gpr_n10d_pit', 'gpr_change_pit', 'gpr_pct_change_pit', 'gpr_ac_change_pit', 'gpr_ac_pct_change_pit', 'gpr_th_change_pit', 'gpr_th_pct_change_pit', 'gpr_ma_diff7_pit', 'gpr_ma_diff30_pit']
+
+[3/6] A ler taxa de juro sem risco...
+    ita_risk_free.csv: 150 linhas, 2025-11-20 a 2026-06-29
+    media 0.0360
+
+[4/6] A ler VIX...
+    ita_vix.csv: 151 linhas, 2025-11-20 a 2026-06-29
+    media 0.1972 (decimal)
+
+[5/6] A ler dividend yield...
+    ita_dividend_yield.csv: 2173 linhas, 2018-01-02 a 2026-08-25
+    media 0.0049
+
+[6/6] A calcular features e target...
+    1734 obs com target | 60 colunas
+    A calcular CRR roll-down forecast (pode demorar ~1 min)...
+    CRR: 1731 previsoes calculadas
+
+  -- Analise de Liquidez (1734 obs totais) --
+    Volume = 0      :   943 obs  ( 54.4%)
+    Volume < 10     :  1547 obs  ( 89.2%)
+    OI = 0          :    58 obs  (  3.3%)
+    OI < 50         :   646 obs  ( 37.3%)
+    Robusto (vol>0 & OI>0 & spread<50%):   724 obs  ( 41.8%)
+    Principal (vol>0 & OI>0):   791 obs  ( 45.6%)
+    Obs liquidas (vol>0 & OI>0): 791/1734
+
+    Feature counts: sem_indices=22 | so_GPR=36 | so_VIX=23 | GPR_e_VIX=37
+
+  -- Diagnostico de Multicolinearidade GPR vs VIX --
+    Pearson(GPR, VIX): r = 0.4928 | VIF bivariado: 1.32
+
+    Amostra comum (4 configs): 1678 obs | 2025-11-21 -> 2026-06-17
+    Datas unicas: 142
+
+  ORIGEM MOVEL: 4 blocos mensais (2026-03, 2026-04, 2026-05, 2026-06) | janela expansiva
+    [1/4] 2026-03: treino 265 obs (61 datas), purgadas 71, teste 366 obs (22 datas) | 0.4 min
+    [2/4] 2026-04: treino 604 obs (83 datas), purgadas 98, teste 398 obs (21 datas) | 0.4 min
+    [3/4] 2026-05: treino 1010 obs (104 datas), purgadas 90, teste 360 obs (20 datas) | 0.6 min
+    [4/4] 2026-06: treino 1370 obs (124 datas), purgadas 90, teste 218 obs (13 datas) | 0.7 min
+
+  [saved] predictions_ITA_<config>.csv + origens.csv
+
+[OK] Outputs guardados em: C:\Users\tiago\Desktop\codigo\output_horse_race_origem_movel

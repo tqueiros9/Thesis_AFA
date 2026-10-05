@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Previsao do mid-quote de opcoes ITA US a cinco dias de negociacao.
+Forecast of ITA US option mid-quotes five trading days ahead.
 
-Testa se o indice de risco geopolitico Caldara-Iacoviello acrescenta informacao
-para alem das caracteristicas da opcao, do ETF subjacente e do VIX. Compara oito
-modelos contra dois referenciais: passeio aleatorio e arvore binomial CRR.
+Tests whether the Caldara-Iacoviello geopolitical risk index adds information
+beyond the characteristics of the option, the underlying ETF and the VIX. It
+compares eight models against two benchmarks: the random walk and the CRR
+binomial tree.
 
-Entradas (todas na pasta deste script; a execucao nao acede a internet):
-    dados_finais.xlsx              opcoes Bloomberg
-    data_gpr_daily_recent.xls      indice GPR
+Inputs (all in this script's folder; the run does not access the internet):
+    dados_finais.xlsx              Bloomberg options
+    data_gpr_daily_recent.xls      GPR index
     ita_vix.csv                    VIX
-    ita_risk_free.csv              taxa sem risco (^IRX)
-    ita_dividend_yield.csv         dividend yield do ITA
+    ita_risk_free.csv              risk-free rate (^IRX)
+    ita_dividend_yield.csv         ITA dividend yield
 
-Saidas em output_horse_race/, dentro da pasta deste script:
-    ITA/results_*.csv       metricas por configuracao
-    ITA/predictions_*.csv   previsoes do conjunto de teste
-    sample_flow.csv         contagens da amostra em cada etapa
-    versions.txt            versoes dos pacotes e parametros da execucao
+Outputs in output_horse_race/, inside this script's folder:
+    ITA/results_*.csv       metrics by configuration
+    ITA/predictions_*.csv   test-set predictions
+    sample_flow.csv         sample counts at each step
+    versions.txt            package versions and run parameters
 
-Correr com:  python horse_race_forecasting_fixed.py
+Run with:  python horse_race_forecasting_fixed.py
 """
 
 import warnings
@@ -48,19 +49,19 @@ from catboost import CatBoostRegressor
 
 
 # =============================================================================
-# CONFIGURACAO
+# CONFIGURATION
 # =============================================================================
 RANDOM_SEED      = 42
 np.random.seed(RANDOM_SEED)
 
-# Pasta onde esta o script: entradas e saidas ficam todas aqui
+# Folder containing the script: inputs and outputs all live here
 PROJECT_DIR      = Path(__file__).resolve().parent
 
 OPTIONS_FILE     = PROJECT_DIR / "dados_finais.xlsx"
 GPR_FILE         = PROJECT_DIR / "data_gpr_daily_recent.xls"
 OUTPUT_DIR       = PROJECT_DIR / "output_horse_race"
 
-# Dados de mercado guardados localmente
+# Market data stored locally
 DIV_YIELD_FILE   = PROJECT_DIR / "ita_dividend_yield.csv"
 VIX_FILE         = PROJECT_DIR / "ita_vix.csv"
 RF_FILE          = PROJECT_DIR / "ita_risk_free.csv"
@@ -68,39 +69,47 @@ RF_FILE          = PROJECT_DIR / "ita_risk_free.csv"
 RISK_FREE_TICKER = "^IRX"
 VIX_TICKER       = "^VIX"
 
-# Execucao sem acesso a internet: exige os CSV na pasta do script.
-# Passar a False apenas para regenerar series em falta.
+# Run without internet access: requires the CSV files in the script folder.
+# Set to False only to regenerate missing series.
 OFFLINE_ONLY     = True
 PROVENANCE_FILE  = PROJECT_DIR / "PROVENIENCIA.txt"
 
 TRAIN_RATIO      = 0.80
 
-# Optimizacao de hiperparametros
+# Hyperparameter optimisation
 TUNE_HYPERPARAMS = True
-N_ITER_SEARCH    = 20     # combinacoes candidatas (base)
+N_ITER_SEARCH    = 20     # candidate combinations (base)
 CV_SPLITS        = 3
 
-# True: n_iter = N_ITER_SEARCH * numero de hiperparametros do modelo.
-# Testado: variacao mediana de 0,00% no RMSE. Mantem-se o orcamento fixo.
+# True: n_iter = N_ITER_SEARCH * number of hyperparameters of the model.
+# Tested: median change of 0.00% in RMSE. The fixed budget is kept.
 SCALE_N_ITER     = False
 
-# Horizonte principal (dias de negociacao)
+# Rolling origin (--origem-movel): temporal robustness added after the
+# primary specification. Expanding window, one test block per calendar month
+# from ORIGEM_PRIMEIRO_MES, hyperparameters re-tuned at each origin using only
+# data before the block. Main set + benchmarks.
+ORIGEM_MOVEL         = False
+ORIGEM_PRIMEIRO_MES  = "2026-03"
+ORIGEM_MODELOS       = ["OLS", "Ridge", "XGBoost"]   # + ElasticNet (delta)
+
+# Main horizon (trading days)
 MAIN_HORIZON_DAYS = 5
 
-# Lag de disponibilidade do GPR (dias de calendario)
+# GPR availability lag (calendar days)
 GPR_AVAILABILITY_LAG = 7
 
-# Filtro de liquidez: 0 = aceita todas as observacoes
+# Liquidity filter: 0 = accept all observations
 MIN_LIQUID_VOL = 0
 MIN_LIQUID_OI  = 0
 
 
 # =============================================================================
-# SECCAO 1 — CARREGAMENTO DO FICHEIRO EXCEL DE OPCOES
+# SECTION 1 — LOADING THE OPTIONS EXCEL FILE
 # =============================================================================
 
 def parse_contract_name(name: str):
-    """Extrai strike, data de expiracao e subjacente do nome do contrato."""
+    """Extracts strike, expiry date and underlying from the contract name."""
     name = str(name).strip()
     m = re.search(r'\b([CP])(\d+(?:\.\d+)?)\b', name)
     strike = float(m.group(2)) if m else None
@@ -128,7 +137,7 @@ def parse_contract_name(name: str):
 
 
 def load_options_excel(path: Path) -> pd.DataFrame:
-    """Le o ficheiro Bloomberg: 8 colunas por contrato, dados a partir da linha 2."""
+    """Reads the Bloomberg file: 8 columns per contract, data from row 2."""
     raw    = pd.read_excel(path, header=None, dtype=str)
     n_cols = raw.shape[1]
     h0     = raw.iloc[0].tolist()
@@ -218,11 +227,11 @@ def load_options_excel(path: Path) -> pd.DataFrame:
 
 
 # =============================================================================
-# SECCAO 2 — CARREGAMENTO DO GPR
+# SECTION 2 — LOADING THE GPR
 # =============================================================================
 
 def load_gpr(path: Path) -> pd.DataFrame:
-    """Carrega o indice GPR e calcula as variaveis derivadas."""
+    """Loads the GPR index and computes the derived variables."""
     raw = pd.read_excel(path)
     raw.columns = raw.columns.str.strip()
 
@@ -249,7 +258,7 @@ def load_gpr(path: Path) -> pd.DataFrame:
         "GPRD_THREAT": "gpr_th",
         "GPRD_MA7"   : "gpr_ma7",
         "GPRD_MA30"  : "gpr_ma30",
-        "N10D"       : "gpr_n10d",  # contagem de artigos de jornal sobre GPR nos ultimos 10 dias
+        "N10D"       : "gpr_n10d",  # count of newspaper articles on GPR over the last 10 days
     }
     raw = raw.rename(columns={k: v for k, v in rename_map.items() if k in raw.columns})
 
@@ -294,11 +303,11 @@ def load_gpr(path: Path) -> pd.DataFrame:
 
 
 # =============================================================================
-# SECCAO 3 — DADOS DE MERCADO (com save/load local)
+# SECTION 3 — MARKET DATA (with local save/load)
 # =============================================================================
 
 def _descarregar(ticker: str, start_date, end_date, col_name: str) -> pd.DataFrame:
-    """Descarrega o fecho de um ticker. So e chamada com OFFLINE_ONLY=False."""
+    """Downloads the close of a ticker. Only called with OFFLINE_ONLY=False."""
     df = yf.download(ticker, start=start_date, end=end_date + pd.Timedelta(days=5),
                      progress=False, auto_adjust=False, multi_level_index=False)
     if df.empty:
@@ -315,7 +324,7 @@ def _descarregar(ticker: str, start_date, end_date, col_name: str) -> pd.DataFra
 
 
 def _verificar_cobertura(df, nome, start_date, end_date):
-    """Confirma que a serie cobre todo o periodo das opcoes."""
+    """Confirms that the series covers the whole option period."""
     if df.empty:
         raise ValueError(f"{nome}: ficheiro vazio.")
     ini, fim = df["date"].min(), df["date"].max()
@@ -330,8 +339,8 @@ def _verificar_cobertura(df, nome, start_date, end_date):
 
 def verificar_dados_mercado(start_date, end_date):
     """
-    Confirma as tres series de mercado antes de qualquer uma ser usada, para
-    que todos os problemas sejam reportados de uma vez e nao um por execucao.
+    Checks the three market series before any of them is used, so that
+    all problems are reported at once and not one per run.
     """
     series = [
         (RF_FILE,        "taxa sem risco", RISK_FREE_TICKER),
@@ -371,7 +380,7 @@ def verificar_dados_mercado(start_date, end_date):
 
 
 def _registar_proveniencia(ticker, path, start_date, end_date):
-    """Anota ticker, periodo e data de descarga."""
+    """Records ticker, period and download date."""
     PROVENANCE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(PROVENANCE_FILE, "a", encoding="utf-8") as f:
         f.write(f"{pd.Timestamp.now():%Y-%m-%d %H:%M}  {ticker:<6} -> {path.name}  "
@@ -380,7 +389,7 @@ def _registar_proveniencia(ticker, path, start_date, end_date):
 
 
 def _serie_mercado(path, col, ticker, start_date, end_date):
-    """Le a serie do CSV local; so descarrega se OFFLINE_ONLY for False."""
+    """Reads the series from the local CSV; only downloads if OFFLINE_ONLY is False."""
     if path.exists():
         df = pd.read_csv(path, parse_dates=["date"])
         df["date"] = df["date"].dt.normalize()
@@ -405,17 +414,17 @@ def _serie_mercado(path, col, ticker, start_date, end_date):
 
 
 def get_risk_free_rate(start_date, end_date) -> pd.DataFrame:
-    """Taxa sem risco (^IRX), ja em decimal."""
+    """Risk-free rate (^IRX), already in decimal."""
     return _serie_mercado(RF_FILE, "risk_free_rate", RISK_FREE_TICKER, start_date, end_date)
 
 
 def get_vix(start_date, end_date) -> pd.DataFrame:
-    """VIX, ja em decimal."""
+    """VIX, already in decimal."""
     return _serie_mercado(VIX_FILE, "vix", VIX_TICKER, start_date, end_date)
 
 
 def get_dividend_yield(start_date, end_date) -> pd.DataFrame:
-    """Dividend yield do ITA (soma de 12 meses sobre o preco de fecho)."""
+    """ITA dividend yield (12-month sum over the closing price)."""
     if not DIV_YIELD_FILE.exists():
         raise FileNotFoundError(
             f"{DIV_YIELD_FILE} nao existe.\n"
@@ -431,13 +440,13 @@ def get_dividend_yield(start_date, end_date) -> pd.DataFrame:
 
 
 # =============================================================================
-# SECCAO 4 — FUNCOES AUXILIARES DO ORIENTADOR
+# SECTION 4 — SUPERVISOR'S HELPER FUNCTIONS
 # =============================================================================
 
 def add_exact_horizon_target(df, master_calendar, horizon=5,
                              contract_col="contract", date_col="date",
                              price_col="price"):
-    """Junta o preco do mesmo contrato na h-esima data de negociacao seguinte."""
+    """Attaches the price of the same contract on the h-th following trading date."""
     out = df.copy()
     out[date_col] = pd.to_datetime(out[date_col]).dt.normalize()
     calendar = pd.DatetimeIndex(
@@ -467,7 +476,7 @@ def add_exact_horizon_target(df, master_calendar, horizon=5,
 
 def merge_gpr_with_availability_lag(options_df, gpr_df, feature_cols,
                                     availability_lag_days=7, date_col="date"):
-    """Junta o GPR com atraso de disponibilidade (o ficheiro e publicado semanalmente)."""
+    """Merges the GPR with an availability lag (the file is published weekly)."""
     left = options_df.copy()
     left[date_col] = pd.to_datetime(left[date_col]).dt.normalize()
     left = left.sort_values(date_col)
@@ -491,7 +500,7 @@ def merge_gpr_with_availability_lag(options_df, gpr_df, feature_cols,
 
 def purged_holdout_split(df, train_ratio=0.80, date_col="date",
                          target_date_col="target_date"):
-    """Separa treino e teste sem deixar alvos de treino entrar no periodo de teste."""
+    """Splits train and test without letting training targets enter the test period."""
     frame = df.sort_values(date_col).copy()
     dates = pd.DatetimeIndex(frame[date_col].dropna().unique()).sort_values()
     cut = int(len(dates) * train_ratio)
@@ -509,7 +518,7 @@ def purged_holdout_split(df, train_ratio=0.80, date_col="date",
 
 def purged_date_cv(df, n_splits=3, initial_train_fraction=0.50,
                    date_col="date", target_date_col="target_date"):
-    """Folds expansivos por data para RandomizedSearchCV (sem lookahead)."""
+    """Expanding folds by date for RandomizedSearchCV (no look-ahead)."""
     frame = df.reset_index(drop=True).copy()
     dates = pd.DatetimeIndex(frame[date_col].dropna().unique()).sort_values()
     first_validation = int(len(dates) * initial_train_fraction)
@@ -535,7 +544,7 @@ def purged_date_cv(df, n_splits=3, initial_train_fraction=0.50,
 
 
 def crr_american_call(S, K, r, q, sigma, T, steps=200):
-    """Preco de uma call americana via arvore Cox-Ross-Rubinstein."""
+    """Price of an American call via the Cox-Ross-Rubinstein tree."""
     values = np.asarray([S, K, r, q, sigma, T], dtype=float)
     if not np.isfinite(values).all() or S <= 0 or K <= 0 or sigma <= 0:
         return np.nan
@@ -567,7 +576,7 @@ def crr_american_call(S, K, r, q, sigma, T, steps=200):
 
 
 def crr_roll_down_forecast(row, steps=200):
-    """Preco CRR mantendo spot, IV, taxa e dividendos de t e reduzindo a maturidade."""
+    """CRR price keeping spot, IV, rate and dividends at t and reducing the maturity."""
     elapsed = (pd.Timestamp(row["target_date"]) - pd.Timestamp(row["date"])).days
     future_T = max(float(row["T"]) - elapsed / 365.0, 0.0)
     q = float(row["dividend_yield"]) if pd.notna(row.get("dividend_yield")) else 0.0
@@ -585,9 +594,9 @@ def crr_roll_down_forecast(row, steps=200):
 def diebold_mariano_by_date(dates, y_true, prediction_a, prediction_b,
                             horizon=5, loss="squared"):
     """
-    Teste DM com a perda agregada por data, com a correccao de Harvey,
-    Leybourne e Newbold (1997) para amostras pequenas.
-    Estatistica negativa favorece a previsao A.
+    Diebold-Mariano test with the loss aggregated by date, using the
+    Harvey, Leybourne and Newbold (1997) small-sample correction.
+    A negative statistic favours forecast A.
     """
     y = np.asarray(y_true,        dtype=float)
     a = np.asarray(prediction_a,  dtype=float)
@@ -632,7 +641,7 @@ def diebold_mariano_by_date(dates, y_true, prediction_a, prediction_b,
 
 
 def holm_adjust(p_values):
-    """Ajuste sequencial de Holm-Bonferroni (com monotonia garantida)."""
+    """Sequential Holm-Bonferroni adjustment (with monotonicity enforced)."""
     p      = np.asarray(p_values, dtype=float)
     order  = np.argsort(p)
     ordered = p[order]
@@ -645,11 +654,11 @@ def holm_adjust(p_values):
 
 
 # =============================================================================
-# SECCAO 5 — FEATURE ENGINEERING
+# SECTION 5 — FEATURE ENGINEERING
 # =============================================================================
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Constroi as variaveis explicativas com informacao disponivel em t."""
+    """Builds the explanatory variables with information available at t."""
     df = df.sort_values(["contract", "date"]).copy()
     g  = df.groupby("contract", sort=False)
 
@@ -690,7 +699,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         df["intrinsic_call"] = (df["spot"] - df["strike"]).clip(lower=0.0)
         df["time_value_t"]   = (df["price"] - df["intrinsic_call"]).clip(lower=0.0)
 
-        # Intrinseco aproximado em t+h sob a medida neutra ao risco.
+        # Approximate intrinsic value at t+h under the risk-neutral measure.
         if "risk_free_rate" in df.columns:
             df["spot_fwd"] = df["spot"] * np.exp(
                 df["risk_free_rate"].fillna(0.045) * MAIN_HORIZON_DAYS / 365.0
@@ -712,31 +721,31 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # =============================================================================
-# SECCAO 6 — TARGET E SPLIT
+# SECTION 6 — TARGET AND SPLIT
 # =============================================================================
 
 def build_forecast_target(df: pd.DataFrame, master_calendar,
                           horizon: int = 5) -> pd.DataFrame:
-    """Constroi o alvo na h-esima data de negociacao seguinte."""
+    """Builds the target on the h-th following trading date."""
     df = df.sort_values(["contract", "date"]).copy()
     df = df[df["days_to_maturity"] > horizon].copy()
 
     df = add_exact_horizon_target(df, master_calendar, horizon=horizon)
 
-    # Renomear para compatibilidade com o resto do pipeline
+    # Rename for compatibility with the rest of the pipeline
     df = df.rename(columns={"target_h": f"target_{horizon}d"})
-    df["target_t1"] = df[f"target_{horizon}d"]   # coluna de trabalho
+    df["target_t1"] = df[f"target_{horizon}d"]   # working column
 
     df = df.dropna(subset=["target_t1", "target_date"]).copy()
     return df
 
 
 # =============================================================================
-# SECCAO 7 — MODELOS
+# SECTION 7 — MODELS
 # =============================================================================
 
 def build_models() -> dict:
-    """Modelos da horse race. Lineares e MLP levam StandardScaler; arvores nao."""
+    """Horse-race models. Linear models and MLP get a StandardScaler; trees do not."""
     return {
         "OLS": Pipeline([
             ("scaler", StandardScaler()),
@@ -799,7 +808,7 @@ def build_models() -> dict:
 
 
 def build_elastic_net_model():
-    """ElasticNet com hiperparametros do orientador (adequado para features GPR correlacionadas)."""
+    """ElasticNet with the supervisor's hyperparameters (suited to correlated GPR features)."""
     return Pipeline([
         ("scaler", StandardScaler()),
         ("model",  ElasticNet(
@@ -812,12 +821,12 @@ def build_elastic_net_model():
 
 
 # =============================================================================
-# SECCAO 8 — AVALIACAO E DIEBOLD-MARIANO
+# SECTION 8 — EVALUATION AND DIEBOLD-MARIANO
 # =============================================================================
 
 def evaluate(y_true: np.ndarray, y_pred: np.ndarray, name: str = "",
              naive_rmse: float = None) -> dict:
-    """RMSE, MAE, R2, Theil_U para forecasting de precos de opcoes."""
+    """RMSE, MAE, R2, Theil_U for option price forecasting."""
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
 
@@ -863,7 +872,7 @@ def liquidity_report(df: pd.DataFrame) -> pd.Series:
         count = (series <= thresh).sum()
         print(f"    {label:<16}: {count:>5} obs  ({100*count/n:5.1f}%)")
 
-    # Subset de liquidez recomendado pelo orientador
+    # Liquidity subset recommended by the supervisor
     spread_ratio = (df["spread"] / df["price"]).fillna(np.inf) if "spread" in df.columns else pd.Series(np.inf, index=df.index)
     liquid_strict = (vol > 0) & (oi > 0) & (spread_ratio <= 0.50)
     print(f"    Robusto (vol>0 & OI>0 & spread<50%): "
@@ -876,7 +885,7 @@ def liquidity_report(df: pd.DataFrame) -> pd.Series:
 
 
 # =============================================================================
-# SECCAO 8b — HIPERPARAMETROS
+# SECTION 8b — HYPERPARAMETERS
 # =============================================================================
 
 def get_param_grids() -> dict:
@@ -924,8 +933,8 @@ def get_param_grids() -> dict:
 
 def tune_model(name, model, X_train, y_train, param_grids, cv_folds=None):
     """
-    Pesquisa aleatoria de hiperparametros sobre folds purgados.
-    Sem grelha (OLS) ou sem folds: treina com os valores por omissao.
+    Randomised hyperparameter search over purged folds.
+    No grid (OLS) or no folds: trains with the default values.
     """
     grid = param_grids.get(name)
     if grid is None or cv_folds is None:
@@ -949,11 +958,11 @@ def tune_model(name, model, X_train, y_train, param_grids, cv_folds=None):
 
 
 # =============================================================================
-# SECCAO 9 — HORSE RACE AUXILIAR
+# SECTION 9 — AUXILIARY HORSE RACE
 # =============================================================================
 
 def _print_dm_table(dates_test, y_test, predictions, naive_pred, h=5):
-    """Tabela do teste DM por data, com correccao de Holm."""
+    """Table of the DM test by date, with Holm correction."""
     print(f"\n  Diebold-Mariano vs Naive (por data, h={h}d, HLN 1997)")
     print(f"  Perda agregada por data: {pd.DatetimeIndex(dates_test).nunique()} datas no teste")
     print(f"  Correcao Holm-Bonferroni (familia={len(predictions)} testes)")
@@ -1119,7 +1128,7 @@ def _print_comparison_table(resultados: dict):
 
 def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
                     horizon: int = 5):
-    """Corre os benchmarks e os modelos numa configuracao e devolve os resultados."""
+    """Runs the benchmarks and the models in one configuration and returns the results."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1132,7 +1141,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
     importances = {}
     predictions = {}
 
-    # Purged CV folds para tuning
+    # Purged CV folds for tuning
     cv_folds = None
     if TUNE_HYPERPARAMS and "target_date" in train_df.columns:
         try:
@@ -1145,7 +1154,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
 
     # -------------------------------------------------------------------------
     # Benchmarks
-    # -------------------------------------------------------------------------
+    # Benchmarks
     naive_pred = test_df["naive_forecast"].values
     naive_rmse = float(np.sqrt(mean_squared_error(y_test, naive_pred)))
     results.append(evaluate(y_test, naive_pred, "Naive (Random Walk)", naive_rmse=naive_rmse))
@@ -1165,7 +1174,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
             predictions["CRR binomial (roll-down)"] = crr_pred
 
     # -------------------------------------------------------------------------
-    # Modelos tabulares (nivel de preco)
+    # Tabular models (price level)
     # -------------------------------------------------------------------------
     param_grids = get_param_grids()
     if TUNE_HYPERPARAMS:
@@ -1179,7 +1188,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
             if TUNE_HYPERPARAMS:
                 model, n_it = tune_model(name, model, X_train, y_train,
                                          param_grids, cv_folds=cv_folds)
-                # OLS nao tem grelha
+                # OLS has no grid
                 print(f"({n_it} comb.) " if n_it else "(sem tuning) ", end="", flush=True)
             else:
                 model.fit(X_train, y_train)
@@ -1195,7 +1204,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
             print(f"ERRO ({exc})")
 
     # -------------------------------------------------------------------------
-    # ElasticNet com modelo delta
+    # ElasticNet on the price change (delta model)
     # -------------------------------------------------------------------------
     print(f"      {'ElasticNet (delta)':<22}", end="", flush=True)
     try:
@@ -1218,9 +1227,9 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
         print(f"ERRO ({exc})")
 
     # -------------------------------------------------------------------------
-    # Diebold-Mariano por data e breakdown por moneyness
+    # Diebold-Mariano by date and breakdown by moneyness
     # -------------------------------------------------------------------------
-    # DM vs Naive para todos os modelos e para o CRR
+    # DM vs Naive for all models and for the CRR
     tabular_preds = {
         k: v for k, v in predictions.items()
         if k != "Naive (Random Walk)"
@@ -1236,7 +1245,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
         _print_moneyness_breakdown(test_df, y_test, tabular_preds, naive_pred)
 
     # -------------------------------------------------------------------------
-    # Avaliacao em observacoes liquidas
+    # Evaluation on liquid observations
     # -------------------------------------------------------------------------
     if "volume_log" in test_df.columns:
         liq_mask = test_df["volume_log"].values > 0
@@ -1256,7 +1265,7 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
                           f"Theil={liq_rmse/liq_naive_rmse:.4f}")
 
     # -------------------------------------------------------------------------
-    # Guardar resultados
+    # Saving results
     # -------------------------------------------------------------------------
     results_df = (
         pd.DataFrame(results)
@@ -1287,8 +1296,114 @@ def _run_horse_race(train_df, test_df, feature_cols, label, out_dir,
 
 
 # =============================================================================
-# SECCAO 10 — MAIN
+# SECTION 9b — ROLLING ORIGIN (TEMPORAL ROBUSTNESS)
 # =============================================================================
+
+def _prever_origem(train_df, test_df, feature_cols):
+    """Predictions of one origin: benchmarks and main set, with tuning on the training set."""
+    X_train = train_df[feature_cols].values
+    y_train = train_df["target_t1"].values
+    X_test  = test_df[feature_cols].values
+
+    preds = {"Naive (Random Walk)": test_df["naive_forecast"].values}
+    if "crr_forecast" in test_df.columns:
+        preds["CRR binomial (roll-down)"] = test_df["crr_forecast"].values
+
+    cv_folds = purged_date_cv(train_df, n_splits=CV_SPLITS,
+                              date_col="date", target_date_col="target_date")
+    param_grids = get_param_grids()
+
+    modelos = build_models()
+    for nome in ORIGEM_MODELOS:
+        modelo, _ = tune_model(nome, modelos[nome], X_train, y_train,
+                               param_grids, cv_folds=cv_folds)
+        preds[nome] = modelo.predict(X_test)
+
+    en_model = build_elastic_net_model()
+    delta_train = y_train - train_df["price"].values
+    en_model, _ = tune_model("ElasticNet", en_model, X_train, delta_train,
+                             param_grids, cv_folds=cv_folds)
+    preds["ElasticNet (delta)"] = test_df["price"].values + en_model.predict(X_test)
+    return preds
+
+
+def _run_origem_movel(df_common, configs, out_dir):
+    """
+    Rolling origin with an expanding window and monthly test blocks.
+    At each origin the training set is the history before the first day of the
+    block, without the observations whose target falls inside the block (same
+    purge as the holdout).
+    """
+    import time
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    meses  = df_common["date"].dt.to_period("M")
+    blocos = [m for m in sorted(meses.unique())
+              if m >= pd.Period(ORIGEM_PRIMEIRO_MES, "M")]
+    print(f"\n  ORIGEM MOVEL: {len(blocos)} blocos mensais "
+          f"({', '.join(str(b) for b in blocos)}) | janela expansiva")
+
+    acumulado = {cfg: [] for cfg, _, _ in configs}
+    fluxo = []
+    for k, mes in enumerate(blocos, 1):
+        inicio = time.time()
+        for cfg_label, feat_cols, _ in configs:
+            feat_ok = [c for c in feat_cols if c in df_common.columns]
+            keep_cols = list(dict.fromkeys(
+                ["date", "contract", "target_t1", "target_date",
+                 "naive_forecast", "price", "moneyness", "volume_log"]
+                + (["crr_forecast"] if "crr_forecast" in df_common.columns else [])
+                + feat_ok
+            ))
+            mdf = (
+                df_common[[c for c in keep_cols if c in df_common.columns]]
+                .dropna(subset=feat_ok + ["target_t1"])
+                .sort_values("date")
+                .reset_index(drop=True)
+            )
+            no_bloco   = mdf["date"].dt.to_period("M") == mes
+            first_test = mdf.loc[no_bloco, "date"].min()
+            test_df  = mdf[no_bloco].copy()
+            train_df = mdf[(mdf["date"] < first_test)
+                           & (mdf["target_date"] < first_test)].copy()
+            n_antes  = int((mdf["date"] < first_test).sum())
+
+            preds = _prever_origem(train_df, test_df, feat_ok)
+
+            out = test_df[["date", "contract", "target_date", "target_t1",
+                           "naive_forecast"]].copy()
+            if "crr_forecast" in test_df.columns:
+                out["crr_forecast"] = test_df["crr_forecast"].values
+            for nome, p in preds.items():
+                col = "pred_" + nome.lower().replace(" ", "_").replace("(", "").replace(")", "")
+                out[col] = p
+            out["origem"] = str(mes)
+            acumulado[cfg_label].append(out)
+
+            if cfg_label == configs[0][0]:
+                fluxo.append(dict(
+                    origem=str(mes), primeiro_dia_teste=first_test.date(),
+                    datas_treino=train_df["date"].nunique(),
+                    obs_treino=len(train_df), obs_purgadas=n_antes - len(train_df),
+                    obs_teste=len(test_df), datas_teste=test_df["date"].nunique(),
+                ))
+        f = fluxo[-1]
+        print(f"    [{k}/{len(blocos)}] {mes}: treino {f['obs_treino']} obs "
+              f"({f['datas_treino']} datas), purgadas {f['obs_purgadas']}, "
+              f"teste {f['obs_teste']} obs ({f['datas_teste']} datas) "
+              f"| {(time.time() - inicio) / 60:.1f} min")
+
+    for cfg_label, partes in acumulado.items():
+        pd.concat(partes, ignore_index=True).to_csv(
+            out_dir / f"predictions_ITA_{cfg_label}.csv", index=False)
+    pd.DataFrame(fluxo).to_csv(out_dir.parent / "origens.csv", index=False)
+    print(f"\n  [saved] predictions_ITA_<config>.csv + origens.csv")
+
+
+# =============================================================================
+# SECCAO 10 — MAIN
+# SECTION 10 — MAIN
 
 def main():
     erros_globais = []
@@ -1304,7 +1419,7 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # =========================================================================
-    # BLOCO 1 — CARREGAMENTO DE DADOS
+    # BLOCK 1 — DATA LOADING
     # =========================================================================
 
     print("\n[1/6] A carregar dados de opcoes...")
@@ -1316,13 +1431,13 @@ def main():
     if n_ita == 0:
         raise ValueError("Nenhum contrato ITA encontrado.")
     n_obs_brutas = len(options)
-    # Observacoes com bid e ask
+    # Observations with bid and ask
     n_obs_midquote = int(options["price"].notna().sum())
     print(f"    ITA US: {n_ita} contratos | {n_obs_brutas} obs | "
           f"{options['date'].min().date()} -> {options['date'].max().date()}")
     print(f"    Com mid-quote valido (bid e ask): {n_obs_midquote} obs")
 
-    # Calendario de trading: datas unicas com spot disponivel
+    # Trading calendar: unique dates with spot available
     master_calendar = sorted(
         options.loc[options["spot_ita_us_equity"].notna(), "date"].unique()
     )
@@ -1335,12 +1450,12 @@ def main():
         gpr_feature_cols_raw = [c for c in gpr.columns if c != "date"]
         print(f"    GPR: {len(gpr)} obs | componentes: {gpr_feature_cols_raw}")
 
-        # Merge com atraso de disponibilidade (sem backfill)
+        # Merge with availability lag (no backfill)
         options = merge_gpr_with_availability_lag(
             options, gpr, gpr_feature_cols_raw,
             availability_lag_days=GPR_AVAILABILITY_LAG
         )
-        # Nomes das colunas GPR apos o merge (sufixo _pit)
+        # GPR column names after the merge (suffix _pit)
         gpr_feature_cols = [f"{c}_pit" for c in gpr_feature_cols_raw
                             if f"{c}_pit" in options.columns]
         print(f"    GPR features (point-in-time, lag={GPR_AVAILABILITY_LAG}d): {gpr_feature_cols}")
@@ -1352,9 +1467,9 @@ def main():
 
     start_dt, end_dt = options["date"].min(), options["date"].max()
 
-    # Series de mercado lidas de ficheiro. As tres sao verificadas em conjunto
-    # antes de qualquer uma ser usada, para que os problemas sejam reportados
-    # todos de uma vez em vez de um por execucao.
+    # Market series read from file. The three are checked together
+    # before any is used, so that problems are reported
+    # all at once rather than one per run.
     verificar_dados_mercado(start_dt, end_dt)
 
     print("\n[3/6] A ler taxa de juro sem risco...")
@@ -1387,7 +1502,7 @@ def main():
     df_all  = build_forecast_target(options, master_calendar, horizon=MAIN_HORIZON_DAYS)
     print(f"    {len(df_all)} obs com target | {len(df_all.columns)} colunas")
 
-    # Benchmark CRR (necessita target_date de build_forecast_target)
+    # CRR benchmark (needs target_date from build_forecast_target)
     if "dividend_yield" in df_all.columns and "spot" in df_all.columns:
         print("    A calcular CRR roll-down forecast (pode demorar ~1 min)...")
         df_all["crr_forecast"] = df_all.apply(
@@ -1402,7 +1517,7 @@ def main():
           f"{int(liquid_mask.sum())}/{len(df_all)}")
 
     # =========================================================================
-    # BLOCO 2 — FEATURE SETS
+    # BLOCK 2 — FEATURE SETS
     # =========================================================================
 
     base_features = [
@@ -1434,7 +1549,7 @@ def main():
 
     print(f"\n    Feature counts: " + " | ".join(f"{l}={len(f)}" for l, f, _ in configs))
 
-    # Diagnostico de multicolinearidade GPR vs VIX
+    # GPR vs VIX multicollinearity diagnostic
     gpr_col_for_diag = next((c for c in gpr_feature_cols if c.endswith("gpr_pit")), None)
     if gpr_col_for_diag and "vix" in df_all.columns:
         g_s = df_all[gpr_col_for_diag].dropna()
@@ -1446,7 +1561,7 @@ def main():
             print(f"\n  -- Diagnostico de Multicolinearidade GPR vs VIX --")
             print(f"    Pearson(GPR, VIX): r = {rho:.4f} | VIF bivariado: {vif:.2f}")
 
-    # Amostra comum: linhas validas na configuracao mais rica
+    # Common sample: valid rows in the richest configuration
     richest_feat = make_feat(gpr_feature_cols + vix_features)
     richest_ok   = [c for c in richest_feat if c in df_all.columns]
     all_cols = list(dict.fromkeys(
@@ -1464,8 +1579,22 @@ def main():
           f"{df_common['date'].min().date()} -> {df_common['date'].max().date()}")
     print(f"    Datas unicas: {df_common['date'].nunique()}")
 
+    if ORIGEM_MOVEL:
+        out_om = OUTPUT_DIR / "ITA"
+        _run_origem_movel(df_common, configs, out_om)
+        df_common.to_csv(out_om / "dataset_ITA_common.csv", index=False)
+        with open(OUTPUT_DIR / "versions.txt", "w") as f:
+            f.write(f"data_execucao: {pd.Timestamp.now()}\n")
+            f.write(f"seed: {RANDOM_SEED}\nhorizonte: {MAIN_HORIZON_DAYS}\n")
+            f.write(f"origem_movel: janela expansiva, blocos mensais desde {ORIGEM_PRIMEIRO_MES}\n")
+            f.write(f"modelos: {ORIGEM_MODELOS + ['ElasticNet (delta)']}\n")
+            f.write(f"n_iter_base: {N_ITER_SEARCH}\nn_iter_escalado: {SCALE_N_ITER}\n")
+            f.write(f"gpr_lag_dias: {GPR_AVAILABILITY_LAG}\n")
+        print(f"\n[OK] Outputs guardados em: {OUTPUT_DIR.resolve()}")
+        return
+
     # =========================================================================
-    # BLOCO 3 — HORSE RACES
+    # BLOCK 3 — HORSE RACES
     # =========================================================================
 
     print("\n" + "=" * 72)
@@ -1476,9 +1605,9 @@ def main():
     out_ita.mkdir(parents=True, exist_ok=True)
 
     resultados  = {}
-    predicoes   = {}   # cfg -> {modelo: previsoes no teste}
-    testes      = {}   # cfg -> test_df usado (para alinhar DM entre configs)
-    flow_counts = {}   # cfg -> (n_total, n_treino, n_purgadas, n_teste)
+    predicoes   = {}   # cfg -> {model: test-set predictions}
+    testes      = {}   # cfg -> test_df used (to align DM across configs)
+    flow_counts = {}   # cfg -> (n_total, n_train, n_purged, n_test)
 
     for cfg_label, feat_cols, cfg_descr in configs:
         feat_ok = [c for c in feat_cols if c in df_common.columns]
@@ -1528,12 +1657,12 @@ def main():
         flow_counts[cfg_label] = (len(mdf), len(train_df), n_purged, len(test_df))
         _print_results_table(res, f"ITA | {cfg_label}  [{cfg_descr}]  [{MAIN_HORIZON_DAYS}d]")
 
-    # Guardar dataset completo
+    # Save the full dataset
     df_common.to_csv(out_ita / "dataset_ITA_common.csv", index=False)
     print(f"\n  [saved] dataset_ITA_common.csv ({len(df_common)} obs)")
 
     # =========================================================================
-    # BLOCO 4 — TABELAS DE IMPACTO
+    # BLOCK 4 — IMPACT TABLES
     # =========================================================================
 
     if "GPR_e_VIX" in resultados and "sem_indices" in resultados:
@@ -1551,9 +1680,9 @@ def main():
     _print_comparison_table(resultados)
 
     # =========================================================================
-    # BLOCO 4b — TESTE CENTRAL: DM ENTRE CONFIGURACOES
+    # BLOCK 4b — CENTRAL TEST: DM BETWEEN CONFIGURATIONS
     # =========================================================================
-    # Compara as previsoes de duas configs. DM negativo favorece a config A.
+    # Compares the predictions of two configs. Negative DM favours config A.
 
     def _dm_cross_config(cfg_a, cfg_b, titulo):
         if cfg_a not in predicoes or cfg_b not in predicoes:
@@ -1604,7 +1733,7 @@ def main():
                      "GPR vs baseline sem indices")
 
     # =========================================================================
-    # BLOCO 4c — REPRODUTIBILIDADE
+    # BLOCK 4c — REPRODUCIBILITY
     # =========================================================================
 
     import sklearn as _sk
@@ -1642,7 +1771,7 @@ def main():
     print(f"\n  [saved] versions.txt + sample_flow.csv (reproducao)")
 
     # =========================================================================
-    # BLOCO 5 — SUMARIO FINAL
+    # BLOCK 5 — FINAL SUMMARY
     # =========================================================================
 
     print(f"\n{'=' * 72}")
@@ -1661,7 +1790,7 @@ def main():
     print(f"{'=' * 72}")
 
     # =========================================================================
-    # BLOCO 6 — ERROS E AVISOS
+    # BLOCK 6 — ERRORS AND WARNINGS
     # =========================================================================
 
     if erros_globais:
@@ -1677,4 +1806,30 @@ def main():
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Horse race ITA US. Sem opcoes corre a especificacao principal."
+    )
+    parser.add_argument("--lag0", action="store_true",
+                        help="GPR contemporaneo, sem atraso de disponibilidade (analise ex post)")
+    parser.add_argument("--escalado", action="store_true",
+                        help="orcamento de busca = 20 x numero de hiperparametros de cada modelo")
+    parser.add_argument("--origem-movel", action="store_true",
+                        help="robustez temporal: janela expansiva, blocos mensais de teste, "
+                             "conjunto principal (OLS, Ridge, EN, XGBoost)")
+    args = parser.parse_args()
+
+    # Each variant writes to its own folder, so the primary one is not overwritten
+    sufixo = ""
+    if args.origem_movel:
+        ORIGEM_MOVEL = True
+        sufixo += "_origem_movel"
+    if args.lag0:
+        GPR_AVAILABILITY_LAG = 0
+        sufixo += "_lag0"
+    if args.escalado:
+        SCALE_N_ITER = True
+        sufixo += "_escalado"
+    OUTPUT_DIR = PROJECT_DIR / f"output_horse_race{sufixo}"
+
     main()

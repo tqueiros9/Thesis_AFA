@@ -1,0 +1,461 @@
+========================================================================
+HORSE RACE -- ITA US (iShares Aerospace & Defense ETF)
+Horizonte: 5 dias de negociacao (calendario exato)
+GPR: 0 dias de atraso de disponibilidade
+Configs: sem_indices | so_GPR | so_VIX | GPR_e_VIX
+HP tuning: RandomizedSearch
+========================================================================
+
+[1/6] A carregar dados de opcoes...
+    ITA US: 30 contratos | 1980 obs | 2025-11-20 -> 2026-06-25
+    Com mid-quote valido (bid e ask): 1880 obs
+    Calendario de trading: 148 datas
+
+[2/6] A carregar GPR (Caldara & Iacoviello) com lag 0 dias...
+    GPR: 15155 obs | componentes: ['gpr', 'gpr_ac', 'gpr_th', 'gpr_ma7', 'gpr_ma30', 'gpr_n10d', 'gpr_change', 'gpr_pct_change', 'gpr_ac_change', 'gpr_ac_pct_change', 'gpr_th_change', 'gpr_th_pct_change', 'gpr_ma_diff7', 'gpr_ma_diff30']
+    GPR features (point-in-time, lag=0d): ['gpr_pit', 'gpr_ac_pit', 'gpr_th_pit', 'gpr_ma7_pit', 'gpr_ma30_pit', 'gpr_n10d_pit', 'gpr_change_pit', 'gpr_pct_change_pit', 'gpr_ac_change_pit', 'gpr_ac_pct_change_pit', 'gpr_th_change_pit', 'gpr_th_pct_change_pit', 'gpr_ma_diff7_pit', 'gpr_ma_diff30_pit']
+
+[3/6] A ler taxa de juro sem risco...
+    ita_risk_free.csv: 150 linhas, 2025-11-20 a 2026-06-29
+    media 0.0360
+
+[4/6] A ler VIX...
+    ita_vix.csv: 151 linhas, 2025-11-20 a 2026-06-29
+    media 0.1972 (decimal)
+
+[5/6] A ler dividend yield...
+    ita_dividend_yield.csv: 2173 linhas, 2018-01-02 a 2026-08-25
+    media 0.0049
+
+[6/6] A calcular features e target...
+    1734 obs com target | 60 colunas
+    A calcular CRR roll-down forecast (pode demorar ~1 min)...
+    CRR: 1731 previsoes calculadas
+
+  -- Analise de Liquidez (1734 obs totais) --
+    Volume = 0      :   943 obs  ( 54.4%)
+    Volume < 10     :  1547 obs  ( 89.2%)
+    OI = 0          :    58 obs  (  3.3%)
+    OI < 50         :   646 obs  ( 37.3%)
+    Robusto (vol>0 & OI>0 & spread<50%):   724 obs  ( 41.8%)
+    Principal (vol>0 & OI>0):   791 obs  ( 45.6%)
+    Obs liquidas (vol>0 & OI>0): 791/1734
+
+    Feature counts: sem_indices=22 | so_GPR=36 | so_VIX=23 | GPR_e_VIX=37
+
+  -- Diagnostico de Multicolinearidade GPR vs VIX --
+    Pearson(GPR, VIX): r = 0.4861 | VIF bivariado: 1.31
+
+    Amostra comum (4 configs): 1678 obs | 2025-11-21 -> 2026-06-17
+    Datas unicas: 142
+
+========================================================================
+  HORSE RACE: ITA US
+========================================================================
+
+  [sem_indices]  Baseline (sem indices externos)
+  [sem_indices]  Treino: 1082 obs (2025-11-21 -> 2026-04-29) | 108 datas
+  [sem_indices]  Purgadas na fronteira (alvo em periodo de teste): 90 obs
+  [sem_indices]  Teste:  506 obs (2026-05-07 -> 2026-06-17) | 29 datas
+  [sem_indices]  22 features
+      [HP tuning: 20 fixas combinacoes x 3 folds purged]
+      OLS                   (sem tuning) OK
+      Ridge                 (20 comb.) OK
+      RandomForest          C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+C:\Users\tiago\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\parallel.py:144: UserWarning: `sklearn.utils.parallel.delayed` should be used with `sklearn.utils.parallel.Parallel` to make it possible to propagate the scikit-learn configuration of the current thread to the joblib workers.
+  warnings.warn(
+(20 comb.) OK
+      XGBoost               (20 comb.) OK
+      LightGBM              (20 comb.) OK
+      CatBoost              (20 comb.) OK
+      MLP                   (20 comb.) OK
+      ElasticNet (delta)    (20 comb.) OK
+
+  Diebold-Mariano vs Naive (por data, h=5d, HLN 1997)
+  Perda agregada por data: 29 datas no teste
+  Correcao Holm-Bonferroni (familia=9 testes)
+  DM_stat > 0 = modelo PIOR; < 0 = modelo MELHOR
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig(Holm)
+  ----------------------------------------------------------------------------
+  CRR binomial (roll-down)         1.1727       29     0.2508     1.0000  
+  OLS                              0.9296       29     0.3605     1.0000  
+  Ridge                            0.7024       29     0.4882     1.0000  
+  RandomForest                     0.4819       29     0.6336     1.0000  
+  XGBoost                          0.5770       29     0.5686     1.0000  
+  LightGBM                         0.6476       29     0.5225     1.0000  
+  CatBoost                         0.6482       29     0.5221     1.0000  
+  MLP                              1.1584       29     0.2565     1.0000  
+  ElasticNet (delta)               0.4772       29     0.6369     1.0000  
+
+  Breakdown por Moneyness (RMSE):
+
+  Grupo                            N     Naive  CRR binom        OLS      Ridge  RandomFor    XGBoost   LightGBM   CatBoost
+  -------------------------------------------------------------------------------------------------------------------------
+  ITM  (m > 1.05)                  3  [omitido: <5 obs]
+  ATM  (0.95 <= m <= 1.05)       236    3.2276     3.3615     4.3657     4.1440     3.8453     3.9197     4.0868     4.0180
+  OTM  (m < 0.95)                267    2.9699     3.2973     3.5599     3.3092     3.1190     3.1263     3.1275     3.1378
+
+  Avaliacao em obs liquidas (volume>0): 193 obs
+    OLS                             RMSE=3.6265  Theil=1.2782
+    Ridge                           RMSE=3.2832  Theil=1.1571
+    RandomForest                    RMSE=3.1700  Theil=1.1172
+    XGBoost                         RMSE=3.1642  Theil=1.1152
+    LightGBM                        RMSE=3.2702  Theil=1.1526
+    CatBoost                        RMSE=3.3403  Theil=1.1773
+    MLP                             RMSE=3.8225  Theil=1.3472
+    ElasticNet (delta)              RMSE=3.1124  Theil=1.0970
+
+==========================================================================================
+  ITA | sem_indices  [Baseline (sem indices externos)]  [5d]
+==========================================================================================
+  #    Modelo                               RMSE        MAE         R2   Theil_U
+  ----------------------------------------------------------------------------------------
+  1    Naive (Random Walk)                3.0882     2.4540     0.6598    1.0000  <-- MELHOR
+  2    CRR binomial (roll-down)           3.3187     2.5348     0.6071    1.0746
+  3    ElasticNet (delta)                 3.4353     2.7146     0.5790    1.1124
+  4    RandomForest                       3.4715     2.6281     0.5701    1.1241
+  5    XGBoost                            3.5240     2.7378     0.5570    1.1411
+  6    CatBoost                           3.5819     2.8509     0.5423    1.1599
+  7    LightGBM                           3.6169     2.8265     0.5333    1.1712
+  8    Ridge                              3.7246     2.9358     0.5051    1.2061
+  9    OLS                                3.9572     3.2349     0.4413    1.2814
+  10   MLP                                4.0372     3.1593     0.4185    1.3073
+==========================================================================================
+
+  [so_GPR]  GPR apenas
+  [so_GPR]  Treino: 1082 obs (2025-11-21 -> 2026-04-29) | 108 datas
+  [so_GPR]  Purgadas na fronteira (alvo em periodo de teste): 90 obs
+  [so_GPR]  Teste:  506 obs (2026-05-07 -> 2026-06-17) | 29 datas
+  [so_GPR]  36 features
+      [HP tuning: 20 fixas combinacoes x 3 folds purged]
+      OLS                   (sem tuning) OK
+      Ridge                 (20 comb.) OK
+      RandomForest          (20 comb.) OK
+      XGBoost               (20 comb.) OK
+      LightGBM              (20 comb.) OK
+      CatBoost              (20 comb.) OK
+      MLP                   (20 comb.) OK
+      ElasticNet (delta)    (20 comb.) OK
+
+  Diebold-Mariano vs Naive (por data, h=5d, HLN 1997)
+  Perda agregada por data: 29 datas no teste
+  Correcao Holm-Bonferroni (familia=9 testes)
+  DM_stat > 0 = modelo PIOR; < 0 = modelo MELHOR
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig(Holm)
+  ----------------------------------------------------------------------------
+  CRR binomial (roll-down)         1.1727       29     0.2508     1.0000  
+  OLS                             -0.0238       29     0.9812     1.0000  
+  Ridge                           -0.3340       29     0.7409     1.0000  
+  RandomForest                     0.7851       29     0.4390     1.0000  
+  XGBoost                          0.5215       29     0.6062     1.0000  
+  LightGBM                         0.4833       29     0.6326     1.0000  
+  CatBoost                         0.4468       29     0.6585     1.0000  
+  MLP                              2.0575       29     0.0491     0.4415  
+  ElasticNet (delta)              -0.5568       29     0.5821     1.0000  
+
+  Breakdown por Moneyness (RMSE):
+
+  Grupo                            N     Naive  CRR binom        OLS      Ridge  RandomFor    XGBoost   LightGBM   CatBoost
+  -------------------------------------------------------------------------------------------------------------------------
+  ITM  (m > 1.05)                  3  [omitido: <5 obs]
+  ATM  (0.95 <= m <= 1.05)       236    3.2276     3.3615     3.3015     3.2106     3.5841     3.4911     3.5263     3.4315
+  OTM  (m < 0.95)                267    2.9699     3.2973     2.8418     2.7111     3.3002     3.1081     3.1480     2.9499
+
+  Avaliacao em obs liquidas (volume>0): 193 obs
+    OLS                             RMSE=3.0095  Theil=1.0607
+    Ridge                           RMSE=2.7089  Theil=0.9547
+    RandomForest                    RMSE=3.0014  Theil=1.0578
+    XGBoost                         RMSE=2.8963  Theil=1.0208
+    LightGBM                        RMSE=3.0166  Theil=1.0632
+    CatBoost                        RMSE=2.8681  Theil=1.0108
+    MLP                             RMSE=4.3622  Theil=1.5374
+    ElasticNet (delta)              RMSE=2.6449  Theil=0.9322
+
+==========================================================================================
+  ITA | so_GPR  [GPR apenas]  [5d]
+==========================================================================================
+  #    Modelo                               RMSE        MAE         R2   Theil_U
+  ----------------------------------------------------------------------------------------
+  1    ElasticNet (delta)                 2.9051     2.3222     0.6989    0.9407  <-- MELHOR
+  2    Ridge                              2.9604     2.3582     0.6874    0.9586
+  3    OLS                                3.0718     2.5069     0.6634    0.9947
+  4    Naive (Random Walk)                3.0882     2.4540     0.6598    1.0000
+  5    CatBoost                           3.1954     2.5161     0.6357    1.0347
+  6    XGBoost                            3.2997     2.5638     0.6116    1.0685
+  7    CRR binomial (roll-down)           3.3187     2.5348     0.6071    1.0746
+  8    LightGBM                           3.3339     2.6008     0.6035    1.0796
+  9    RandomForest                       3.4399     2.6110     0.5779    1.1139
+  10   MLP                                4.7467     3.8723     0.1962    1.5370
+==========================================================================================
+
+  [so_VIX]  VIX apenas
+  [so_VIX]  Treino: 1082 obs (2025-11-21 -> 2026-04-29) | 108 datas
+  [so_VIX]  Purgadas na fronteira (alvo em periodo de teste): 90 obs
+  [so_VIX]  Teste:  506 obs (2026-05-07 -> 2026-06-17) | 29 datas
+  [so_VIX]  23 features
+      [HP tuning: 20 fixas combinacoes x 3 folds purged]
+      OLS                   (sem tuning) OK
+      Ridge                 (20 comb.) OK
+      RandomForest          (20 comb.) OK
+      XGBoost               (20 comb.) OK
+      LightGBM              (20 comb.) OK
+      CatBoost              (20 comb.) OK
+      MLP                   (20 comb.) OK
+      ElasticNet (delta)    (20 comb.) OK
+
+  Diebold-Mariano vs Naive (por data, h=5d, HLN 1997)
+  Perda agregada por data: 29 datas no teste
+  Correcao Holm-Bonferroni (familia=9 testes)
+  DM_stat > 0 = modelo PIOR; < 0 = modelo MELHOR
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig(Holm)
+  ----------------------------------------------------------------------------
+  CRR binomial (roll-down)         1.1727       29     0.2508     1.0000  
+  OLS                              1.0371       29     0.3086     1.0000  
+  Ridge                            0.8015       29     0.4296     1.0000  
+  RandomForest                     0.4751       29     0.6384     1.0000  
+  XGBoost                          0.6613       29     0.5138     1.0000  
+  LightGBM                         0.6549       29     0.5179     1.0000  
+  CatBoost                         0.9366       29     0.3570     1.0000  
+  MLP                              1.5766       29     0.1261     1.0000  
+  ElasticNet (delta)               0.5405       29     0.5931     1.0000  
+
+  Breakdown por Moneyness (RMSE):
+
+  Grupo                            N     Naive  CRR binom        OLS      Ridge  RandomFor    XGBoost   LightGBM   CatBoost
+  -------------------------------------------------------------------------------------------------------------------------
+  ITM  (m > 1.05)                  3  [omitido: <5 obs]
+  ATM  (0.95 <= m <= 1.05)       236    3.2276     3.3615     4.6810     4.3452     3.8340     3.9725     3.9936     4.3343
+  OTM  (m < 0.95)                267    2.9699     3.2973     3.8567     3.4470     3.1177     3.1687     3.1836     3.5571
+
+  Avaliacao em obs liquidas (volume>0): 193 obs
+    OLS                             RMSE=3.9066  Theil=1.3769
+    Ridge                           RMSE=3.4460  Theil=1.2145
+    RandomForest                    RMSE=3.1623  Theil=1.1145
+    XGBoost                         RMSE=3.2341  Theil=1.1398
+    LightGBM                        RMSE=3.2471  Theil=1.1444
+    CatBoost                        RMSE=3.5243  Theil=1.2421
+    MLP                             RMSE=4.4615  Theil=1.5724
+    ElasticNet (delta)              RMSE=3.1919  Theil=1.1250
+
+==========================================================================================
+  ITA | so_VIX  [VIX apenas]  [5d]
+==========================================================================================
+  #    Modelo                               RMSE        MAE         R2   Theil_U
+  ----------------------------------------------------------------------------------------
+  1    Naive (Random Walk)                3.0882     2.4540     0.6598    1.0000  <-- MELHOR
+  2    CRR binomial (roll-down)           3.3187     2.5348     0.6071    1.0746
+  3    RandomForest                       3.4640     2.6202     0.5719    1.1217
+  4    ElasticNet (delta)                 3.5110     2.7807     0.5602    1.1369
+  5    XGBoost                            3.5731     2.8004     0.5445    1.1570
+  6    LightGBM                           3.5900     2.8041     0.5402    1.1625
+  7    Ridge                              3.8961     3.0681     0.4585    1.2616
+  8    CatBoost                           3.9457     3.0971     0.4446    1.2777
+  9    OLS                                4.2647     3.4814     0.3512    1.3810
+  10   MLP                                4.6444     3.7217     0.2305    1.5039
+==========================================================================================
+
+  [GPR_e_VIX]  GPR + VIX
+  [GPR_e_VIX]  Treino: 1082 obs (2025-11-21 -> 2026-04-29) | 108 datas
+  [GPR_e_VIX]  Purgadas na fronteira (alvo em periodo de teste): 90 obs
+  [GPR_e_VIX]  Teste:  506 obs (2026-05-07 -> 2026-06-17) | 29 datas
+  [GPR_e_VIX]  37 features
+      [HP tuning: 20 fixas combinacoes x 3 folds purged]
+      OLS                   (sem tuning) OK
+      Ridge                 (20 comb.) OK
+      RandomForest          (20 comb.) OK
+      XGBoost               (20 comb.) OK
+      LightGBM              (20 comb.) OK
+      CatBoost              (20 comb.) OK
+      MLP                   (20 comb.) OK
+      ElasticNet (delta)    (20 comb.) OK
+
+  Diebold-Mariano vs Naive (por data, h=5d, HLN 1997)
+  Perda agregada por data: 29 datas no teste
+  Correcao Holm-Bonferroni (familia=9 testes)
+  DM_stat > 0 = modelo PIOR; < 0 = modelo MELHOR
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig(Holm)
+  ----------------------------------------------------------------------------
+  CRR binomial (roll-down)         1.1727       29     0.2508     1.0000  
+  OLS                              0.1000       29     0.9210     1.0000  
+  Ridge                           -0.0038       29     0.9970     1.0000  
+  RandomForest                     0.7513       29     0.4587     1.0000  
+  XGBoost                          0.6099       29     0.5468     1.0000  
+  LightGBM                         0.4405       29     0.6630     1.0000  
+  CatBoost                         0.5387       29     0.5944     1.0000  
+  MLP                              2.0743       29     0.0474     0.4263  
+  ElasticNet (delta)               0.0252       29     0.9800     1.0000  
+
+  Breakdown por Moneyness (RMSE):
+
+  Grupo                            N     Naive  CRR binom        OLS      Ridge  RandomFor    XGBoost   LightGBM   CatBoost
+  -------------------------------------------------------------------------------------------------------------------------
+  ITM  (m > 1.05)                  3  [omitido: <5 obs]
+  ATM  (0.95 <= m <= 1.05)       236    3.2276     3.3615     3.5008     3.3813     3.5977     3.5662     3.4995     3.5245
+  OTM  (m < 0.95)                267    2.9699     3.2973     2.7113     2.7409     3.2854     3.1426     2.9871     3.0009
+
+  Avaliacao em obs liquidas (volume>0): 193 obs
+    OLS                             RMSE=3.0107  Theil=1.0611
+    Ridge                           RMSE=2.7666  Theil=0.9751
+    RandomForest                    RMSE=3.0111  Theil=1.0613
+    XGBoost                         RMSE=3.0417  Theil=1.0720
+    LightGBM                        RMSE=2.8776  Theil=1.0142
+    CatBoost                        RMSE=2.9255  Theil=1.0311
+    MLP                             RMSE=3.7806  Theil=1.3325
+    ElasticNet (delta)              RMSE=2.7959  Theil=0.9854
+
+==========================================================================================
+  ITA | GPR_e_VIX  [GPR + VIX]  [5d]
+==========================================================================================
+  #    Modelo                               RMSE        MAE         R2   Theil_U
+  ----------------------------------------------------------------------------------------
+  1    Ridge                              3.0682     2.4649     0.6642    0.9935  <-- MELHOR
+  2    ElasticNet (delta)                 3.0864     2.4641     0.6602    0.9994
+  3    Naive (Random Walk)                3.0882     2.4540     0.6598    1.0000
+  4    OLS                                3.1215     2.6373     0.6524    1.0108
+  5    LightGBM                           3.2494     2.4732     0.6233    1.0522
+  6    CatBoost                           3.2676     2.6187     0.6191    1.0581
+  7    CRR binomial (roll-down)           3.3187     2.5348     0.6071    1.0746
+  8    XGBoost                            3.3639     2.6837     0.5963    1.0893
+  9    RandomForest                       3.4404     2.6406     0.5777    1.1140
+  10   MLP                                4.2028     3.3197     0.3699    1.3609
+==========================================================================================
+
+  [saved] dataset_ITA_common.csv (1678 obs)
+
+========================================================================
+  IMPACTO DO GPR — GPR+VIX combinado vs baseline
+  Delta RMSE = RMSE(sem GPR) - RMSE(com GPR)   [+ = GPR ajuda]
+========================================================================
+  Modelo                          com GPR    sem GPR    Delta   Delta%
+  --------------------------------------------------------------------
+  OLS                              3.1215     3.9572 + 0.8357 + 26.77%
+  Ridge                            3.0682     3.7246 + 0.6564 + 21.39%
+  LightGBM                         3.2494     3.6169 + 0.3675 + 11.31%
+  ElasticNet (delta)               3.0864     3.4353 + 0.3489 + 11.30%
+  CatBoost                         3.2676     3.5819 + 0.3143 +  9.62%
+  XGBoost                          3.3639     3.5240 + 0.1602 +  4.76%
+  RandomForest                     3.4404     3.4715 + 0.0311 +  0.91%
+  Naive (Random Walk)              3.0882     3.0882 + 0.0000 +  0.00%
+  CRR binomial (roll-down)         3.3187     3.3187 + 0.0000 +  0.00%
+  MLP                              4.2028     4.0372 -0.1656  -3.94%
+========================================================================
+
+========================================================================
+  IMPACTO DO GPR — GPR marginal (GPR_e_VIX vs so_VIX)
+  Delta RMSE = RMSE(sem GPR) - RMSE(com GPR)   [+ = GPR ajuda]
+========================================================================
+  Modelo                          com GPR    sem GPR    Delta   Delta%
+  --------------------------------------------------------------------
+  OLS                              3.1215     4.2647 + 1.1432 + 36.62%
+  Ridge                            3.0682     3.8961 + 0.8279 + 26.98%
+  CatBoost                         3.2676     3.9457 + 0.6781 + 20.75%
+  MLP                              4.2028     4.6444 + 0.4416 + 10.51%
+  ElasticNet (delta)               3.0864     3.5110 + 0.4245 + 13.75%
+  LightGBM                         3.2494     3.5900 + 0.3405 + 10.48%
+  XGBoost                          3.3639     3.5731 + 0.2093 +  6.22%
+  RandomForest                     3.4404     3.4640 + 0.0236 +  0.69%
+  Naive (Random Walk)              3.0882     3.0882 + 0.0000 +  0.00%
+  CRR binomial (roll-down)         3.3187     3.3187 + 0.0000 +  0.00%
+========================================================================
+
+========================================================================
+  IMPACTO DO GPR — VIX marginal (GPR_e_VIX vs so_GPR)
+  Delta RMSE = RMSE(sem GPR) - RMSE(com GPR)   [+ = GPR ajuda]
+========================================================================
+  Modelo                          com GPR    sem GPR    Delta   Delta%
+  --------------------------------------------------------------------
+  MLP                              4.2028     4.7467 + 0.5439 + 12.94%
+  LightGBM                         3.2494     3.3339 + 0.0845 +  2.60%
+  Naive (Random Walk)              3.0882     3.0882 + 0.0000 +  0.00%
+  CRR binomial (roll-down)         3.3187     3.3187 + 0.0000 +  0.00%
+  RandomForest                     3.4404     3.4399 -0.0005  -0.01%
+  OLS                              3.1215     3.0718 -0.0498  -1.59%
+  XGBoost                          3.3639     3.2997 -0.0642  -1.91%
+  CatBoost                         3.2676     3.1954 -0.0722  -2.21%
+  Ridge                            3.0682     2.9604 -0.1078  -3.51%
+  ElasticNet (delta)               3.0864     2.9051 -0.1814  -5.88%
+========================================================================
+
+============================================================================================================================
+  Comparacao so_GPR vs so_VIX vs GPR_e_VIX
+============================================================================================================================
+                                              GPR                           VIX                         GPR+VIX           
+  Modelo                              RMSE       MAE        R2      RMSE       MAE        R2      RMSE       MAE        R2
+  --------------------------------------------------------------------------------------------------------------------------
+  ElasticNet (delta)                2.9051    2.3222    0.6989    3.5110    2.7807    0.5602    3.0864    2.4641    0.6602
+  Ridge                             2.9604    2.3582    0.6874    3.8961    3.0681    0.4585    3.0682    2.4649    0.6642
+  OLS                               3.0718    2.5069    0.6634    4.2647    3.4814    0.3512    3.1215    2.6373    0.6524
+  Naive (Random Walk)               3.0882    2.4540    0.6598    3.0882    2.4540    0.6598    3.0882    2.4540    0.6598
+  CatBoost                          3.1954    2.5161    0.6357    3.9457    3.0971    0.4446    3.2676    2.6187    0.6191
+  XGBoost                           3.2997    2.5638    0.6116    3.5731    2.8004    0.5445    3.3639    2.6837    0.5963
+  CRR binomial (roll-down)          3.3187    2.5348    0.6071    3.3187    2.5348    0.6071    3.3187    2.5348    0.6071
+  LightGBM                          3.3339    2.6008    0.6035    3.5900    2.8041    0.5402    3.2494    2.4732    0.6233
+  RandomForest                      3.4399    2.6110    0.5779    3.4640    2.6202    0.5719    3.4404    2.6406    0.5777
+  MLP                               4.7467    3.8723    0.1962    4.6444    3.7217    0.2305    4.2028    3.3197    0.3699
+============================================================================================================================
+
+==============================================================================
+  TESTE CENTRAL — DM por data: GPR marginal controlando para VIX (pergunta de investigacao)
+  A = GPR_e_VIX | B = so_VIX | DM_stat < 0 favorece A (com GPR)
+==============================================================================
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig
+  --------------------------------------------------------------------------
+  OLS                             -1.3609       29     0.1844     1.0000  
+  Ridge                           -1.2005       29     0.2400     1.0000  
+  RandomForest                    -0.0566       29     0.9553     1.0000  
+  XGBoost                         -0.6811       29     0.5014     1.0000  
+  LightGBM                        -0.8256       29     0.4160     1.0000  
+  CatBoost                        -1.0995       29     0.2809     1.0000  
+  MLP                             -0.7750       29     0.4449     1.0000  
+  ElasticNet (delta)              -0.9713       29     0.3397     1.0000  
+==============================================================================
+
+==============================================================================
+  TESTE CENTRAL — DM por data: GPR vs baseline sem indices
+  A = so_GPR | B = sem_indices | DM_stat < 0 favorece A (com GPR)
+==============================================================================
+  Modelo                          DM_stat  N_datas    p_bruto     p_holm  Sig
+  --------------------------------------------------------------------------
+  OLS                             -0.9951       29     0.3282     1.0000  
+  Ridge                           -1.0708       29     0.2934     1.0000  
+  RandomForest                    -0.0844       29     0.9333     1.0000  
+  XGBoost                         -0.6503       29     0.5208     1.0000  
+  LightGBM                        -0.8933       29     0.3793     1.0000  
+  CatBoost                        -0.7385       29     0.4664     1.0000  
+  MLP                              1.3937       29     0.1744     1.0000  
+  ElasticNet (delta)              -1.0011       29     0.3254     1.0000  
+==============================================================================
+
+  [saved] versions.txt + sample_flow.csv (reproducao)
+
+========================================================================
+  SUMARIO FINAL — MELHOR MODELO POR CONFIGURACAO
+========================================================================
+  Config           N feat Melhor modelo                        RMSE         R2
+  --------------------------------------------------------------------------
+  sem_indices          22 Naive (Random Walk)                3.0882     0.6598
+  so_GPR               36 ElasticNet (delta)                 2.9051     0.6989
+  so_VIX               23 Naive (Random Walk)                3.0882     0.6598
+  GPR_e_VIX            37 Ridge                              3.0682     0.6642
+========================================================================
+
+  [OK] Execucao sem erros ou avisos.
+
+[OK] Outputs guardados em: C:\Users\tiago\Desktop\codigo\output_horse_race_lag0

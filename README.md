@@ -12,8 +12,9 @@ All inputs sit in the same folder as the scripts, and all outputs are written to
 .
 ├── horse_race_forecasting_fixed.py   estimation: data, features, tuning, fitting, predictions
 ├── analise_resultados.py             evaluation: every statistic reported in the dissertation, from the saved predictions
+├── analise_origem_movel.py           evaluation of the rolling-origin robustness exercise (Section 4.7.8)
 ├── figuras.py                        figures of Chapter 4, from the saved predictions
-├── correr_tudo.py                    runs everything from scratch and checks it against the delivered results
+├── correr_tudo.py                    asks which steps to run (estimations, evaluations, figures) and runs them in order
 ├── requirements.txt                  exact package versions of the reported execution
 ├── PROVENIENCIA.txt                  source, transformation, coverage and download date of each input
 ├── dados_finais.xlsx                 option data (Bloomberg Spreadsheet Builder)
@@ -31,6 +32,7 @@ All inputs sit in the same folder as the scripts, and all outputs are written to
 │       └── dataset_ITA_common.csv         common sample used by the four configurations
 ├── output_horse_race_lag0/           robustness: contemporaneous GPR (ex post), same structure
 ├── output_horse_race_escalado/       robustness: search budget of 20 candidates per hyperparameter, same structure
+├── output_horse_race_origem_movel/   robustness: rolling origin, four monthly test blocks (Mar–Jun 2026); predictions carry an `origem` column
 └── figuras/                          PNG figures written by figuras.py
 ```
 
@@ -56,9 +58,9 @@ No path needs to be edited: every script locates its inputs in its own folder. T
 python correr_tudo.py
 ```
 
-Runs the whole analysis from scratch in about 40 minutes and checks it against the delivered results. It saves the evaluation of the delivered outputs, re-estimates the three specifications in sequence, re-runs the evaluation, compares the new predictions and every reported statistic with the delivered ones, and writes the figures. The log of each step is saved to `logs/`. The final line states whether the delivered results were reproduced exactly.
+Asks a yes/no question for each step (the four estimations, the two evaluations and the figures; Enter accepts the default, yes), shows the selection, asks for a final confirmation and then runs only what was chosen, one step after another. Nothing needs to be edited in the code. Running everything takes about 35 minutes; a single step can be run on its own by answering no to the others. The log of each step is saved to `logs/`. An evaluation step is skipped, with a message, if its predictions do not exist yet and their estimation was not selected. The script does not compare the results with anything.
 
-The three estimations run one after the other rather than in parallel: each already uses every processor core, and CatBoost writes to the system's temporary folder, which simultaneous runs would share.
+The four estimations run one after the other rather than in parallel: each already uses every processor core, and CatBoost writes to the system's temporary folder, which simultaneous runs would share.
 
 The individual steps are described below.
 
@@ -71,6 +73,12 @@ python horse_race_forecasting_fixed.py --escalado   # scaled search budget   -> 
 ```
 
 Builds the sample and the features, tunes and fits every model under the four configurations, and writes the test-set forecasts. The run is fully offline (`OFFLINE_ONLY = True`). It stops if the option file or any market series is missing or does not cover the option sample; if the GPR file cannot be read, the error is reported at the end of the run and the configurations containing the index are not valid.
+
+```bash
+python horse_race_forecasting_fixed.py --origem-movel   # rolling origin      -> output_horse_race_origem_movel/
+```
+
+The rolling-origin run uses an expanding training window and one test block per calendar month from March 2026. Each origin trains only on observations dated, and with a target dated, before the first day of its block (the same purge as the holdout), re-tunes the hyperparameters on that training set with the primary budget (20 candidates, 3 expanding purged folds), and forecasts the block. It covers the main set (OLS, Ridge, Elastic Net, XGBoost) and the two benchmarks under the four configurations, and takes about two minutes. It was added after the primary results (the dissertation describes it as such); it is one of the steps offered by `correr_tudo.py` and is evaluated with `python analise_origem_movel.py`, which writes nothing and prints the tables of Section 4.7.8. Two consecutive runs gave identical predictions.
 
 The script also prints diagnostic Diebold–Mariano tables with Holm adjustment across all fitted models. These are not the tables reported in the dissertation, which use the families of Section 3.7.2 and are produced in step 2.
 
