@@ -1583,8 +1583,15 @@ def main():
         out_om = OUTPUT_DIR / "ITA"
         _run_origem_movel(df_common, configs, out_om)
         df_common.to_csv(out_om / "dataset_ITA_common.csv", index=False)
+        import sklearn as _sk
         with open(OUTPUT_DIR / "versions.txt", "w") as f:
             f.write(f"data_execucao: {pd.Timestamp.now()}\n")
+            f.write(f"python: {__import__('sys').version.split()[0]}\n")
+            f.write(f"numpy: {np.__version__}\npandas: {pd.__version__}\n")
+            f.write(f"scikit-learn: {_sk.__version__}\nxgboost: {xgb.__version__}\n")
+            f.write(f"lightgbm: {lgb.__version__}\n")
+            f.write(f"catboost: {__import__('catboost').__version__}\n")
+            f.write(f"yfinance: {yf.__version__}\n")
             f.write(f"seed: {RANDOM_SEED}\nhorizonte: {MAIN_HORIZON_DAYS}\n")
             f.write(f"origem_movel: janela expansiva, blocos mensais desde {ORIGEM_PRIMEIRO_MES}\n")
             f.write(f"modelos: {ORIGEM_MODELOS + ['ElasticNet (delta)']}\n")
